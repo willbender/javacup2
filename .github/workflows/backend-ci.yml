@@ -27,15 +27,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    - name: Build with Maven
-      working-directory: ./backend
-      run: mvn clean compile
-      
-    - name: Run tests
-      working-directory: ./backend
-      run: mvn test
-      
-    - name: Verify build
+    - name: Build and verify
       working-directory: ./backend
       run: mvn clean verify
       
