@@ -17,7 +17,7 @@ public class HealthController {
     private String version;
 
     @Value("${application.name}")
-    private String appName;
+    private String applicationName;
 
     @Value("${application.description}")
     private String description;
@@ -33,7 +33,7 @@ public class HealthController {
     @GetMapping("/info")
     public ResponseEntity<Map<String, String>> info() {
         Map<String, String> response = new HashMap<>();
-        response.put("application", appName);
+        response.put("application", applicationName);
         response.put("version", version);
         response.put("description", description);
         return ResponseEntity.ok(response);

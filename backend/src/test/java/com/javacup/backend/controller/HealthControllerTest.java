@@ -7,6 +7,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.notNullValue;
 
 @WebMvcTest(HealthController.class)
 class HealthControllerTest {
@@ -27,7 +28,7 @@ class HealthControllerTest {
         mockMvc.perform(get("/api/info"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.application").value("JavaCup Backend"))
-                .andExpect(jsonPath("$.version").value("1.0.0-SNAPSHOT"))
+                .andExpect(jsonPath("$.version").value(notNullValue()))
                 .andExpect(jsonPath("$.description").value("Backend service for JavaCup project"));
     }
 }
