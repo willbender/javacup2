@@ -30,7 +30,7 @@ The backend follows a layered architecture pattern with clear separation of conc
 ## Technology Stack
 
 - **Java**: 21 (LTS)
-- **Spring Boot**: 3.2.2
+- **Spring Boot**: 3.5.10
 - **Build Tool**: Maven 3.x
 - **Testing Framework**: JUnit 5 (Jupiter)
 - **Web Framework**: Spring MVC
@@ -99,7 +99,7 @@ mvn spring-boot:run
 
 ```bash
 mvn clean package
-java -jar target/backend-1.0.0-SNAPSHOT.jar
+java -jar target/backend-2.0.0.jar
 ```
 
 The application will start on port 8080 by default.
@@ -124,7 +124,7 @@ The application will start on port 8080 by default.
   ```json
   {
     "application": "JavaCup Backend",
-    "version": "1.0.0-SNAPSHOT",
+    "version": "2.0.0",
     "description": "Backend service for JavaCup project"
   }
   ```
