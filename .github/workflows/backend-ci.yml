@@ -1,0 +1,52 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build with Maven
+      working-directory: ./backend
+      run: mvn clean compile
+      
+    - name: Run tests
+      working-directory: ./backend
+      run: mvn test
+      
+    - name: Verify build
+      working-directory: ./backend
+      run: mvn clean verify
+      
+    - name: Generate test report
+      if: always()
+      working-directory: ./backend
+      run: mvn surefire-report:report
+      
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: backend/target/surefire-reports/
