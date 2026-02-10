@@ -3,7 +3,7 @@
 ## Table of Contents
 - [General Description](#general-description)
 - [Backend Architecture](./BACKEND.md) - Detailed backend documentation
-- [Frontend Architecture](#frontend-architecture)
+- [Frontend Architecture](./FRONTEND.md) - Detailed frontend documentation
 - [Setup and Running Instructions](#setup-and-running-instructions)
 
 ---
@@ -177,7 +177,19 @@ The backend documentation covers:
 
 ## Frontend Architecture
 
-**Coming soon** - Detailed documentation of the rendering system and viewer components.
+For detailed documentation of the frontend visualization system, including all rendering components, GUI classes, and viewer implementations, please refer to:
+
+**📄 [FRONTEND.md](./FRONTEND.md)**
+
+The frontend documentation covers:
+- Dual viewer system (VisorBasico 2D Swing, VisorOpenGl 3D)
+- Rendering components (PintaCancha, PintaJugador, PintaBalon, PintaMarcador)
+- GUI components (PrincipalFrame, AsistenteFrame, PrincipalDatos)
+- Backend integration via PartidoInterface
+- Update loop and rendering pipeline
+- Audio system with event-driven playback
+- Camera controls and coordinate transformation
+- Complete architecture diagrams and data flow
 
 ---
 
