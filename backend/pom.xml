@@ -32,12 +32,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring Boot Actuator for health checks -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
         <!-- Spring Boot Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

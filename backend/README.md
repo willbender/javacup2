@@ -129,23 +129,15 @@ The application will start on port 8080 by default.
   }
   ```
 
-### Actuator Health
-- **URL**: `GET /actuator/health`
-- **Description**: Spring Boot Actuator health endpoint
-- **Response**:
-  ```json
-  {
-    "status": "UP"
-  }
-  ```
-
 ## Configuration
 
 The application can be configured through `src/main/resources/application.properties`:
 
 - `server.port`: The port on which the application runs (default: 8080)
 - `spring.application.name`: The name of the application
-- `management.endpoints.web.exposure.include`: Which actuator endpoints to expose
+- `application.version`: Application version (from pom.xml via Maven filtering)
+- `application.name`: Application name (from pom.xml via Maven filtering)
+- `application.description`: Application description (from pom.xml via Maven filtering)
 
 ## Design Patterns and Best Practices
 
