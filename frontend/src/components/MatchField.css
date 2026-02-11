@@ -1,0 +1,15 @@
+.match-field-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.match-field-canvas {
+  border: 2px solid #333;
+  border-radius: 4px;
+  background-color: #2d7d2d;
+}
