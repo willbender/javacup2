@@ -69,6 +69,15 @@ public final class CommandHitBall extends Command {
     private final boolean isAngle;
     
     /**
+     * Returns whether this kick uses angle-based targeting.
+     *
+     * @return true if angle-based, false if coordinate-based
+     */
+    public boolean isAngle() {
+        return isAngle;
+    }
+    
+    /**
      * True if kick destination is specified by coordinates, false if by angle.
      */
     private final boolean isCoordinate;
