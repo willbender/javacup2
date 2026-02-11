@@ -22,10 +22,20 @@ The backend follows a layered architecture pattern with clear separation of conc
 - **Purpose**: Handles data persistence and database operations
 - **Status**: To be implemented when database integration is needed
 
-### 4. **Domain Layer** (Future)
-- **Location**: `src/main/java/com/javacup/backend/model/` or `domain/`
-- **Purpose**: Contains entity classes and domain models
-- **Status**: To be implemented as the data model is defined
+### 4. **Domain Layer - Match Engine**
+- **Location**: `src/main/java/com/javacup/model/`
+- **Purpose**: Core football match simulation engine
+- **Status**: ✅ 95% Complete (20/21 files migrated)
+  - **Packages**:
+    - `model/` - Core interfaces (Tactic, TacticDetail, PlayerDetail)
+    - `model/command/` - Player command system (movement, kicking)
+    - `model/trajectory/` - Ball physics (aerial, ground trajectories)
+    - `model/util/` - Utilities (Constants, Position, validation)
+    - `model/engine/` - Match simulation engine (95% complete)
+  - **Remaining**:
+    - GameSituations.java - Game state provider for tactics
+    - Match.java - Main match engine (~1600 lines)
+    - SavedMatch.java - Match replay/serialization
 
 ## Technology Stack
 
@@ -34,6 +44,8 @@ The backend follows a layered architecture pattern with clear separation of conc
 - **Build Tool**: Maven 3.x
 - **Testing Framework**: JUnit 5 (Jupiter)
 - **Web Framework**: Spring MVC
+- **Code Generation**: Lombok (for reducing boilerplate)
+- **Logging**: SLF4J + Logback (via Spring Boot)
 
 ## Project Structure
 
@@ -42,10 +54,35 @@ backend/
 ├── src/
 │   ├── main/
 │   │   ├── java/
-│   │   │   └── com/javacup/backend/
-│   │   │       ├── BackendApplication.java    # Main Spring Boot application
-│   │   │       └── controller/
-│   │   │           └── HealthController.java  # REST endpoints
+│   │   │   ├── com/javacup/backend/
+│   │   │   │   ├── BackendApplication.java    # Main Spring Boot application
+│   │   │   │   └── controller/
+│   │   │   │       └── HealthController.java  # REST endpoints
+│   │   │   └── com/javacup/model/             # ✨ Match Engine (NEW)
+│   │   │       ├── Tactic.java                # AI interface for tactics
+│   │   │       ├── TacticDetail.java          # Team configuration
+│   │   │       ├── PlayerDetail.java          # Player attributes
+│   │   │       ├── UniformStyle.java          # Jersey patterns
+│   │   │       ├── command/                   # Player commands
+│   │   │       │   ├── Command.java           # Base command class
+│   │   │       │   ├── CommandMoveTo.java     # Movement commands
+│   │   │       │   └── CommandHitBall.java    # Kicking commands
+│   │   │       ├── trajectory/                # Ball physics
+│   │   │       │   ├── AbstractTrajectory.java # Trajectory base
+│   │   │       │   ├── AirTrajectory.java      # Aerial physics
+│   │   │       │   └── FloorTrajectory.java    # Ground roll physics
+│   │   │       ├── util/                      # Utilities
+│   │   │       │   ├── Constants.java         # Game constants
+│   │   │       │   ├── Position.java          # 2D coordinates
+│   │   │       │   └── TacticValidate.java    # Validation
+│   │   │       └── engine/                    # Match engine
+│   │   │           ├── Acceleration.java      # Turn physics
+│   │   │           ├── PlayerImpl.java        # Player implementation
+│   │   │           ├── TacticImpl.java        # Tactic wrapper
+│   │   │           ├── TacticDetailImpl.java  # Config wrapper
+│   │   │           ├── Iteration.java         # Replay data
+│   │   │           └── MatchInterface.java    # Public API
+│   │   │           # TODO: GameSituations, Match, SavedMatch
 │   │   └── resources/
 │   │       └── application.properties         # Application configuration
 │   └── test/
@@ -138,6 +175,83 @@ The application can be configured through `src/main/resources/application.proper
 - `application.version`: Application version (from pom.xml via Maven filtering)
 - `application.name`: Application name (from pom.xml via Maven filtering)
 - `application.description`: Application description (from pom.xml via Maven filtering)
+
+## Match Engine Architecture
+
+The match engine (`com.javacup.model`) simulates football matches with realistic physics:
+
+### Core Components
+
+1. **Tactics & Players**
+   - `Tactic`: AI interface for team control (execute commands every iteration)
+   - `TacticDetail`: Team configuration (name, uniforms, players)
+   - `PlayerDetail`: Individual player attributes (speed, power, precision)
+   
+2. **Command System**
+   - `CommandMoveTo`: Direct player movement (with optional sprint)
+   - `CommandHitBall`: Ball kicking (supports angle/coordinate targeting, power control)
+
+3. **Physics Engine**
+   - **Ball Trajectories**: 
+     - `AirTrajectory`: Aerial physics with gravity & air resistance
+     - `FloorTrajectory`: Ground roll with friction
+     - Automatic bouncing and trajectory chaining
+   - **Player Movement**:
+     - `Acceleration`: Momentum-based turning (can't instantly change direction)
+     - Energy system (sprint costs energy, passive recovery)
+     - Speed affected by attributes, energy, and acceleration
+
+4. **Match Engine** (⚠️ Partially Complete)
+   - `MatchInterface`: Public API for match execution
+   - `GameSituations`: Provides game state to tactics (TODO)
+   - `Match`: Main simulation engine - 60 iterations/second (TODO)
+   - `SavedMatch`: Match recording for replays (TODO)
+
+### Match Simulation Flow
+
+```
+Every Iteration (1/60th of a second):
+1. Update ball physics (trajectory)
+2. Call both tactics → get commands
+3. Process movements (with physics)
+4. Process kicks (one per iteration max)
+5. Detect events (goals, out of bounds, fouls)
+6. Update energy & acceleration
+7. Store state if recording
+```
+
+### Key Features
+
+- **Realistic Physics**: Gravity, air resistance, friction, bouncing
+- **Energy Management**: Sprint wisely or run out of stamina
+- **Turn Penalties**: Can't change direction at full speed
+- **Credit System**: Limited points to distribute across player attributes
+- **Validation**: Automatic checks for rules compliance
+- **Replay System**: Save and replay matches
+
+### Migration Status
+
+✅ **Completed (95%)**:
+- All interfaces and data structures
+- Command system (movement, kicking)
+- Physics engine (trajectories, acceleration)
+- Utility classes (position, constants, validation)
+- Wrapper classes (tactic implementations, iteration storage)
+
+🔄 **In Progress (5%)**:
+- GameSituations (~400 lines): Game state provider for tactics
+- Match (~1600 lines): Core match engine  
+- SavedMatch (~500 lines): Match serialization for replays
+
+### For Developers
+
+To create a tactic:
+1. Implement `Tactic` interface
+2. Return `TacticDetail` with team configuration
+3. Implement `execute()` to return commands each iteration
+4. Implement positioning methods for kickoffs
+
+See `javacup2013/BACKEND.md` for detailed architecture documentation.
 
 ## Design Patterns and Best Practices
 
