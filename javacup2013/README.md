@@ -217,7 +217,7 @@ The setup guide covers:
 cd javacup2013
 
 # 3. Compile
-javac -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
+javac -encoding ISO-8859-1 -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
 
 # 4. Run
 java -cp "bin;libs/*;recursos;tacticas" JavaCup

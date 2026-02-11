@@ -151,10 +151,12 @@ javacup2013/
 
 3. **Compile the project**:
    ```batch
-   javac -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
+   javac -encoding ISO-8859-1 -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
    ```
 
    This will compile all dependencies automatically.
+   
+   **Note**: The `-encoding ISO-8859-1` flag is required because the project contains source files with specific character encoding (Spanish characters in comments).
 
 4. **Verify compilation**:
    ```batch
@@ -404,7 +406,7 @@ public class MyTactic implements Tactic {
 ### Compile New Tactic
 
 ```batch
-javac -d bin -cp "bin;libs/*;src;recursos;tacticas" tacticas/org/javahispano/javacup/tacticas/MyTactic.java
+javac -encoding ISO-8859-1 -d bin -cp "bin;libs/*;src;recursos;tacticas" tacticas/org/javahispano/javacup/tacticas/MyTactic.java
 ```
 
 ---
@@ -522,7 +524,7 @@ Modify `Torneo.java` to specify which tactics to compete.
 2. Check `bin/` folder contains compiled classes
 3. Recompile if necessary:
    ```batch
-   javac -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
+   javac -encoding ISO-8859-1 -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
    ```
 
 #### Issue 5: Audio Not Playing
@@ -672,7 +674,7 @@ If you encounter issues:
 3. Compile:
    ```batch
    cd javacup2013
-   javac -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
+   javac -encoding ISO-8859-1 -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
    ```
 4. Run:
    ```batch
