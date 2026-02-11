@@ -139,7 +139,7 @@ Teams have limited "credits" to distribute among players and attributes, requiri
 
 ### Technology Stack
 
-- **Language**: Java (originally Java 6/7 era, compatible with Java 21)
+- **Language**: Java (originally Java 6, recommend Java 8 for compatibility)
 - **Graphics**: Slick2D, LWJGL (Lightweight Java Game Library) for OpenGL
 - **UI**: Java Swing for GUI components
 - **Audio**: OpenAL via LWJGL
@@ -195,13 +195,13 @@ The frontend documentation covers:
 
 ## Setup and Running Instructions
 
-For complete step-by-step instructions to set up, compile, and run JavaCup 2013 on Windows with Java 21, please refer to:
+For complete step-by-step instructions to set up, compile, and run JavaCup 2013 on Windows with Java 8, please refer to:
 
 **📄 [SETUP_AND_RUNNING.md](./SETUP_AND_RUNNING.md)**
 
 The setup guide covers:
 - Prerequisites and system requirements
-- Java 21 installation and configuration
+- Java 8 installation and configuration
 - Project compilation (command line, Eclipse, IntelliJ)
 - Running the application and launching matches
 - Creating and testing custom tactics
@@ -212,7 +212,7 @@ The setup guide covers:
 
 **Quick Start** (for the impatient):
 ```batch
-# 1. Install Java 21
+# 1. Install Java 8
 # 2. Clone project
 cd javacup2013
 

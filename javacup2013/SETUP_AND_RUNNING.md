@@ -1,6 +1,6 @@
 # Setup and Running Instructions
 
-This guide provides step-by-step instructions to set up, compile, and run JavaCup 2013 on Windows with Java 21.
+This guide provides step-by-step instructions to set up, compile, and run JavaCup 2013 on Windows with Java 8.
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
@@ -18,10 +18,10 @@ This guide provides step-by-step instructions to set up, compile, and run JavaCu
 
 ### Required Software
 
-1. **Java Development Kit (JDK) 21**
-   - Download from: https://www.oracle.com/java/technologies/downloads/#java21
-   - Or use OpenJDK: https://adoptium.net/
-   - **Important**: While JavaCup 2013 was originally built for Java 6, it is compatible with Java 21
+1. **Java Development Kit (JDK) 8**
+   - Download from: https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html
+   - Or use OpenJDK 8: https://adoptium.net/temurin/releases/?version=8
+   - **Important**: JavaCup 2013 was originally built for Java 6 and works best with Java 8. Newer Java versions may have compatibility issues with the legacy libraries (Slick2D, LWJGL 2.x).
 
 2. **Git** (to clone the repository)
    - Download from: https://git-scm.com/download/win
@@ -53,22 +53,24 @@ This guide provides step-by-step instructions to set up, compile, and run JavaCu
 
 ## Installation Steps
 
-### Step 1: Install Java 21
+### Step 1: Install Java 8
 
-1. **Download JDK 21**:
-   - Visit https://www.oracle.com/java/technologies/downloads/#java21
-   - Download "Windows x64 Installer" (e.g., `jdk-21_windows-x64_bin.exe`)
+1. **Download JDK 8**:
+   - Visit https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html
+   - Download "Windows x64" installer (e.g., `jdk-8u XXX-windows-x64.exe`)
+   - **Note**: You may need to create a free Oracle account to download
+   - **Alternative**: Download OpenJDK 8 from https://adoptium.net/temurin/releases/?version=8
 
 2. **Install JDK**:
    - Run the installer
    - Accept license agreement
-   - Choose installation directory (default: `C:\Program Files\Java\jdk-21`)
+   - Choose installation directory (default: `C:\Program Files\Java\jdk1.8.0_XXX`)
    - Click "Install"
 
 3. **Set JAVA_HOME Environment Variable**:
    ```batch
    # Open Command Prompt as Administrator and run:
-   setx JAVA_HOME "C:\Program Files\Java\jdk-21" /M
+   setx JAVA_HOME "C:\Program Files\Java\jdk1.8.0_XXX" /M
    setx PATH "%PATH%;%JAVA_HOME%\bin" /M
    ```
 
@@ -77,7 +79,7 @@ This guide provides step-by-step instructions to set up, compile, and run JavaCu
    - Click "Environment Variables"
    - Under "System variables", click "New"
    - Variable name: `JAVA_HOME`
-   - Variable value: `C:\Program Files\Java\jdk-21` (adjust if different)
+   - Variable value: `C:\Program Files\Java\jdk1.8.0_XXX` (adjust to your version)
    - Edit "Path" variable, add: `%JAVA_HOME%\bin`
 
 4. **Verify Installation**:
@@ -89,8 +91,8 @@ This guide provides step-by-step instructions to set up, compile, and run JavaCu
    
    Expected output:
    ```
-   java version "21" (or "21.0.x")
-   javac 21 (or 21.0.x)
+   java version "1.8.0_XXX"
+   javac 1.8.0_XXX
    ```
 
 ### Step 2: Clone or Download the Project
@@ -174,7 +176,7 @@ javacup2013/
 
 3. **Fix Build Path** (if needed):
    - Right-click project → Build Path → Configure Build Path
-   - Libraries tab → Verify JRE System Library is Java 21
+   - Libraries tab → Verify JRE System Library is Java 8 (1.8)
    - Add External JARs → Browse to `libs/` and add all JAR files
 
 4. **Build Project**:
@@ -188,8 +190,8 @@ javacup2013/
    - File → Open → Browse to `C:\javacup2\javacup2013`
 3. **Configure SDK**:
    - File → Project Structure → Project
-   - SDK: Select Java 21 (or download if not available)
-   - Language level: 21
+   - SDK: Select Java 8 (1.8) (or download if not available)
+   - Language level: 8 or lower
 4. **Add Libraries**:
    - File → Project Structure → Libraries
    - Click "+" → Java
@@ -538,14 +540,19 @@ Modify `Torneo.java` to specify which tactics to compete.
    - Download from: https://www.openal.org/downloads/
    - Install `oalinst.exe`
 
-#### Issue 6: Compilation Errors with Java 21
+#### Issue 6: Compilation Errors with Newer Java Versions
 
-**Cause**: Code originally written for Java 6.
+**Cause**: Code originally written for Java 6, some features may not work with Java 9+.
 
 **Solution**:
-1. Most code should work without changes
-2. If warnings appear about deprecated APIs, they can be ignored
-3. For incompatible code, modify to use modern Java APIs
+1. Use Java 8 as recommended - it provides the best compatibility
+2. If using newer Java versions, you may encounter issues with:
+   - Legacy LWJGL 2.x libraries (require Java 8)
+   - Deprecated APIs in Swing and AWT
+3. For migration to modern Java, consider updating libraries:
+   - LWJGL 2.x → LWJGL 3.x
+   - Slick2D → alternative game library
+   - Update deprecated API calls
 
 #### Issue 7: Config.xml Errors
 
@@ -622,7 +629,7 @@ Double-click `run_javacup.bat` to launch application.
 1. Right-click desktop → New → Shortcut
 2. Location: 
    ```
-   "C:\Program Files\Java\jdk-21\bin\java.exe" -Djava.library.path="C:\javacup2\javacup2013" -cp "C:\javacup2\javacup2013\bin;C:\javacup2\javacup2013\libs\*" JavaCup
+   "C:\Program Files\Java\jdk1.8.0_XXX\bin\java.exe" -Djava.library.path="C:\javacup2\javacup2013" -cp "C:\javacup2\javacup2013\bin;C:\javacup2\javacup2013\libs\*" JavaCup
    ```
 3. Name: JavaCup 2013
 4. Click Finish
@@ -653,7 +660,7 @@ Study these for reference when creating your own tactics.
 
 - **LWJGL Wiki**: https://wiki.lwjgl.org/
 - **Slick2D Documentation**: http://slick.ninjacave.com/
-- **Java 21 Documentation**: https://docs.oracle.com/en/java/javase/21/
+- **Java 8 Documentation**: https://docs.oracle.com/javase/8/docs/
 
 ### Getting Help
 
@@ -669,7 +676,7 @@ If you encounter issues:
 
 **For the impatient - minimum steps**:
 
-1. Install Java 21
+1. Install Java 8
 2. Clone/download project
 3. Compile:
    ```batch
