@@ -4,7 +4,7 @@
 - [General Description](#general-description)
 - [Backend Architecture](./BACKEND.md) - Detailed backend documentation
 - [Frontend Architecture](./FRONTEND.md) - Detailed frontend documentation
-- [Setup and Running Instructions](#setup-and-running-instructions)
+- [Setup and Running Instructions](./SETUP_AND_RUNNING.md) - Complete setup guide
 
 ---
 
@@ -195,6 +195,34 @@ The frontend documentation covers:
 
 ## Setup and Running Instructions
 
-**Coming soon** - Step-by-step guide to set up and run JavaCup 2013 on Windows with Java 21.
+For complete step-by-step instructions to set up, compile, and run JavaCup 2013 on Windows with Java 21, please refer to:
+
+**📄 [SETUP_AND_RUNNING.md](./SETUP_AND_RUNNING.md)**
+
+The setup guide covers:
+- Prerequisites and system requirements
+- Java 21 installation and configuration
+- Project compilation (command line, Eclipse, IntelliJ)
+- Running the application and launching matches
+- Creating and testing custom tactics
+- Graphical tactic editor usage
+- Troubleshooting common issues
+- Advanced configuration options
+- Quick start summary for experienced users
+
+**Quick Start** (for the impatient):
+```batch
+# 1. Install Java 21
+# 2. Clone project
+cd javacup2013
+
+# 3. Compile
+javac -d bin -cp "libs/*;src;recursos;tacticas" src/JavaCup.java
+
+# 4. Run
+java -cp "bin;libs/*;recursos;tacticas" JavaCup
+
+# 5. Select tactics, click "Ver Partido", enjoy!
+```
 
 ---
