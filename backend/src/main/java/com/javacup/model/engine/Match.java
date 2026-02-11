@@ -264,13 +264,14 @@ public final class Match implements MatchInterface {
             validatedAway[1]   // Away receiving kickoff positions
         };
         
-        // Start at lineup positions
+        // Initialize players at their starting positions (home kicks off)
         for (int i = 0; i < 11; i++) {
-            homePositions[i] = new Position(homeNoStart[i]);
+            homePositions[i] = new Position(homeStart[i]);
             awayPositions[i] = new Position(awayNoStart[i]);
         }
         
-        matchState = STATE_LINEUP;
+        matchState = STATE_PLAYING; // Start playing immediately
+        homeKicksOff = true;
     }
 
     // ========================================================================
