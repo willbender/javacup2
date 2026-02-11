@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import MatchField from './components/MatchField'
 import TacticSelector from './components/TacticSelector'
 import './App.css'
@@ -57,33 +57,47 @@ function App() {
     if (!matchStarted) return
 
     const interval = setInterval(() => {
-      // Animate players moving slightly towards the ball
-      setPlayers(prevPlayers => 
-        prevPlayers.map(player => {
-          const dx = (ball.x - player.x) * 0.01
-          const dy = (ball.y - player.y) * 0.01
-          
-          // Add some random movement
-          const randomX = (Math.random() - 0.5) * 0.005
-          const randomY = (Math.random() - 0.5) * 0.005
-          
-          return {
-            ...player,
-            x: Math.max(0.1, Math.min(0.9, player.x + dx + randomX)),
-            y: Math.max(0.1, Math.min(0.9, player.y + dy + randomY))
-          }
-        })
-      )
-
       // Move ball in a simple pattern
-      setBall(prev => ({
-        x: Math.max(0.1, Math.min(0.9, prev.x + (Math.random() - 0.5) * 0.02)),
-        y: Math.max(0.1, Math.min(0.9, prev.y + (Math.random() - 0.5) * 0.02))
-      }))
+      setBall(prev => {
+        const newBall = {
+          x: Math.max(0.1, Math.min(0.9, prev.x + (Math.random() - 0.5) * 0.02)),
+          y: Math.max(0.1, Math.min(0.9, prev.y + (Math.random() - 0.5) * 0.02))
+        }
+        
+        // Animate players moving slightly towards the new ball position
+        setPlayers(prevPlayers => 
+          prevPlayers.map(player => {
+            const dx = (newBall.x - player.x) * 0.01
+            const dy = (newBall.y - player.y) * 0.01
+            
+            // Add some random movement
+            const randomX = (Math.random() - 0.5) * 0.005
+            const randomY = (Math.random() - 0.5) * 0.005
+            
+            return {
+              ...player,
+              x: Math.max(0.1, Math.min(0.9, player.x + dx + randomX)),
+              y: Math.max(0.1, Math.min(0.9, player.y + dy + randomY))
+            }
+          })
+        )
+        
+        return newBall
+      })
     }, 100) // Update every 100ms
 
     return () => clearInterval(interval)
-  }, [matchStarted, ball])
+  }, [matchStarted])
+
+  const homeTacticName = useMemo(
+    () => mockTactics.find(t => t.id === homeTactic)?.name,
+    [homeTactic]
+  )
+  
+  const awayTacticName = useMemo(
+    () => mockTactics.find(t => t.id === awayTactic)?.name,
+    [awayTactic]
+  )
 
   const handleCreateMatch = () => {
     if (!homeTactic || !awayTactic) {
@@ -142,8 +156,8 @@ function App() {
           {matchStarted && (
             <div className="match-status">
               <p className="status-active">Match is running...</p>
-              <p className="team-info">🔴 Home Team: {mockTactics.find(t => t.id === homeTactic)?.name}</p>
-              <p className="team-info">🔵 Away Team: {mockTactics.find(t => t.id === awayTactic)?.name}</p>
+              <p className="team-info">🔴 Home Team: {homeTacticName}</p>
+              <p className="team-info">🔵 Away Team: {awayTacticName}</p>
             </div>
           )}
         </div>

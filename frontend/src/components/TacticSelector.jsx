@@ -10,8 +10,8 @@ const TacticSelector = ({ label, selectedTactic, onTacticChange, tactics }) => {
         onChange={(e) => onTacticChange(e.target.value)}
       >
         <option value="">Select a tactic...</option>
-        {tactics.map((tactic, index) => (
-          <option key={index} value={tactic.id}>
+        {tactics.map((tactic) => (
+          <option key={tactic.id} value={tactic.id}>
             {tactic.name}
           </option>
         ))}
