@@ -106,6 +106,11 @@ public class Analyze {
 			rivalsEnergy = new double[] { 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d };
 			myPlayers = new Position[11];
 			rivalPlayers = new Position[11];
+			// Initialize position objects to avoid NullPointerException
+			for (int i = 0; i < 11; i++) {
+				myPlayers[i] = new Position(0, 0);
+				rivalPlayers[i] = new Position(0, 0);
+			}
 			commands = new CommandMoveTo[] { null, null, null, null, null, null, null, null, null, null, null };
 			ball = null;
 		}
