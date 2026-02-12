@@ -11,11 +11,13 @@ The backend follows a layered architecture pattern with clear separation of conc
 - **Purpose**: Handles HTTP requests and responses
 - **Current Controllers**:
   - `HealthController`: Provides health check and application info endpoints
+  - `TacticsController`: Provides endpoints to list available tactics
 
-### 2. **Service Layer** (Future)
+### 2. **Service Layer**
 - **Location**: `src/main/java/com/javacup/backend/service/`
 - **Purpose**: Contains business logic and orchestrates data flow between controllers and repositories
-- **Status**: To be implemented as business requirements evolve
+- **Current Services**:
+  - `TacticService`: Manages tactics information and provides list of available tactics
 
 ### 3. **Repository Layer** (Future)
 - **Location**: `src/main/java/com/javacup/backend/repository/`
@@ -163,6 +165,41 @@ The application will start on port 8080 by default.
     "application": "JavaCup Backend",
     "version": "2.0.0",
     "description": "Backend service for JavaCup project"
+  }
+  ```
+
+### List Tactics
+- **URL**: `GET /api/tactics`
+- **Description**: Returns a list of all available tactics (team AI strategies) that can be selected for a match. No authentication required.
+- **Response**:
+  ```json
+  {
+    "tactics": [
+      "Ciclones",
+      "JGTeam",
+      "Ander",
+      "Cucaracha",
+      "DyMCupcakes",
+      "Elaga",
+      "Enavas",
+      "Espinete",
+      "FelipeMoraTeam",
+      "Frioleros",
+      "Jhontona",
+      "Kpacha",
+      "Masia13",
+      "Novena",
+      "Pistachos",
+      "Romedal",
+      "SitiosTactic2",
+      "TheShadows",
+      "Toulousains",
+      "TwentyThree",
+      "Txami",
+      "Valedores",
+      "AdamTeam"
+    ],
+    "count": 23
   }
   ```
 
