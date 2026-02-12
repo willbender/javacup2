@@ -500,8 +500,8 @@ public final class Match implements MatchInterface {
      */
     private void updateBallPhysics() {
         double time = (iteration - trajectoryT0) / 60.0;
-        double radius = trajectory.getX(time);
-        ballAltitude = trajectory.getY(time);
+        double radius = trajectory.getX(time) * Constants.TRAJECTORY_VELOCITY_AMPLIFIER;
+        ballAltitude = trajectory.getY(time) * Constants.TRAJECTORY_VELOCITY_AMPLIFIER;
         
         ball = new Position(
             trajectoryX0 + radius * Math.cos(trajectoryAngle0),
