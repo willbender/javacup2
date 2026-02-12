@@ -166,8 +166,6 @@ public class Helper {
 		boolean distanciaMenorMio = sp.ballPosition().distance(pMio) < sp.ballPosition().distance(pRival);
 		boolean balonControlable = sp.ballAltitude() <= Constants.BALL_CONTROL_HEIGHT;
 		
-		// boolean rivalConBalon = idxRival ==
-		// sp.ballPosition().nearestIndex(sp.rivalPlayers());
 		if (!romedal && distanciaMenorMio && balonControlable && mioMasCercano || (mioMasCercano && sp.isStarts())) {
 			marcar = new CommandMoveTo(idxMiJugador, sp.ballPosition(),false);
 		} else {
