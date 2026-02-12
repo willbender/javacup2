@@ -168,81 +168,94 @@ public final class SavedMatch implements MatchInterface, Serializable {
         return iterations.get(currentIterationIndex);
     }
 
+    @JsonIgnore
     @Override
     public boolean isGoal() {
         Iteration current = getCurrentIteration();
         return current != null && current.isGoal();
     }
 
+    @JsonIgnore
     @Override
     public boolean isGoalpost() {
         Iteration current = getCurrentIteration();
         return current != null && current.isGoalpost();
     }
 
+    @JsonIgnore
     @Override
     public boolean isBouncing() {
         Iteration current = getCurrentIteration();
         return current != null && current.isBouncing();
     }
 
+    @JsonIgnore
     @Override
     public boolean isCheering() {
         Iteration current = getCurrentIteration();
         return current != null && current.isCheering();
     }
 
+    @JsonIgnore
     @Override
     public boolean isKicking() {
         Iteration current = getCurrentIteration();
         return current != null && current.isKicking();
     }
 
+    @JsonIgnore
     @Override
     public boolean isTakingSetPiece() {
         Iteration current = getCurrentIteration();
         return current != null && current.isTakingSetPiece();
     }
 
+    @JsonIgnore
     @Override
     public boolean isWhistling() {
         Iteration current = getCurrentIteration();
         return current != null && current.isWhistling();
     }
 
+    @JsonIgnore
     @Override
     public double getBallAltitude() {
         Iteration current = getCurrentIteration();
         return current != null ? Iteration.decompress(current.getBallHeight()) : 0;
     }
 
+    @JsonIgnore
     @Override
     public boolean wasRecorded() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isSetPieceChanged() {
         Iteration current = getCurrentIteration();
         return current != null && current.isSetPieceChanged();
     }
 
+    @JsonIgnore
     @Override
     public TacticDetail getHomeDetail() {
         return homeDetail;
     }
 
+    @JsonIgnore
     @Override
     public TacticDetail getAwayDetail() {
         return awayDetail;
     }
 
-    @Override
     @JsonIgnore
+    @Override
     public SavedMatch getSavedMatch() {
         return this;
     }
 
+    @JsonIgnore
     @Override
     public Position getVisibleBallPosition() {
         Iteration current = getCurrentIteration();
@@ -255,6 +268,7 @@ public final class SavedMatch implements MatchInterface, Serializable {
         );
     }
 
+    @JsonIgnore
     @Override
     public Position[][] getPositions() {
         Iteration current = getCurrentIteration();
@@ -293,6 +307,7 @@ public final class SavedMatch implements MatchInterface, Serializable {
         return positions;
     }
 
+    @JsonIgnore
     @Override
     public void iterate() throws Exception {
         if (currentIterationIndex < iterations.size()) {
@@ -300,24 +315,28 @@ public final class SavedMatch implements MatchInterface, Serializable {
         }
     }
 
+    @JsonIgnore
     @Override
     public int getHomeGoals() {
         Iteration current = getCurrentIteration();
         return current != null ? current.getHomeGoals() : finalHomeGoals;
     }
 
+    @JsonIgnore
     @Override
     public int getAwayGoals() {
         Iteration current = getCurrentIteration();
         return current != null ? current.getAwayGoals() : finalAwayGoals;
     }
 
+    @JsonIgnore
     @Override
     public int getIteration() {
         Iteration current = getCurrentIteration();
         return current != null ? current.getIteration() : iterations.size();
     }
 
+    @JsonIgnore
     @Override
     public double getHomePossession() {
         Iteration current = getCurrentIteration();
@@ -327,12 +346,14 @@ public final class SavedMatch implements MatchInterface, Serializable {
         return finalHomePossession;
     }
 
+    @JsonIgnore
     @Override
     public boolean isOffside() {
         Iteration current = getCurrentIteration();
         return current != null && current.isOffside();
     }
 
+    @JsonIgnore
     @Override
     public boolean isIndirectFreeKick() {
         Iteration current = getCurrentIteration();
