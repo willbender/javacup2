@@ -15,31 +15,31 @@ const mockTactics = [
 // Initial player positions (normalized 0-1)
 const getInitialPlayers = () => {
   const homeTeam = [
-    { number: 1, x: 0.5, y: 0.1, team: 'home' }, // Goalkeeper
-    { number: 2, x: 0.3, y: 0.25, team: 'home' }, // Defenders
-    { number: 3, x: 0.5, y: 0.25, team: 'home' },
-    { number: 4, x: 0.7, y: 0.25, team: 'home' },
-    { number: 5, x: 0.3, y: 0.4, team: 'home' }, // Midfielders
-    { number: 6, x: 0.5, y: 0.4, team: 'home' },
-    { number: 7, x: 0.7, y: 0.4, team: 'home' },
-    { number: 8, x: 0.3, y: 0.55, team: 'home' }, // Forwards
-    { number: 9, x: 0.5, y: 0.55, team: 'home' },
-    { number: 10, x: 0.7, y: 0.55, team: 'home' },
-    { number: 11, x: 0.5, y: 0.65, team: 'home' }
+    { number: 1, x: 0.5, y: 0.1, team: 'home', iter: 3 }, // Goalkeeper
+    { number: 2, x: 0.3, y: 0.25, team: 'home', iter: 3 }, // Defenders
+    { number: 3, x: 0.5, y: 0.25, team: 'home', iter: 3 },
+    { number: 4, x: 0.7, y: 0.25, team: 'home', iter: 3 },
+    { number: 5, x: 0.3, y: 0.4, team: 'home', iter: 3 }, // Midfielders
+    { number: 6, x: 0.5, y: 0.4, team: 'home', iter: 3 },
+    { number: 7, x: 0.7, y: 0.4, team: 'home', iter: 3 },
+    { number: 8, x: 0.3, y: 0.55, team: 'home', iter: 3 }, // Forwards
+    { number: 9, x: 0.5, y: 0.55, team: 'home', iter: 3 },
+    { number: 10, x: 0.7, y: 0.55, team: 'home', iter: 3 },
+    { number: 11, x: 0.5, y: 0.65, team: 'home', iter: 3 }
   ]
 
   const awayTeam = [
-    { number: 1, x: 0.5, y: 0.9, team: 'away' }, // Goalkeeper
-    { number: 2, x: 0.3, y: 0.75, team: 'away' }, // Defenders
-    { number: 3, x: 0.5, y: 0.75, team: 'away' },
-    { number: 4, x: 0.7, y: 0.75, team: 'away' },
-    { number: 5, x: 0.3, y: 0.6, team: 'away' }, // Midfielders
-    { number: 6, x: 0.5, y: 0.6, team: 'away' },
-    { number: 7, x: 0.7, y: 0.6, team: 'away' },
-    { number: 8, x: 0.3, y: 0.45, team: 'away' }, // Forwards
-    { number: 9, x: 0.5, y: 0.45, team: 'away' },
-    { number: 10, x: 0.7, y: 0.45, team: 'away' },
-    { number: 11, x: 0.5, y: 0.35, team: 'away' }
+    { number: 1, x: 0.5, y: 0.9, team: 'away', iter: 3 }, // Goalkeeper
+    { number: 2, x: 0.3, y: 0.75, team: 'away', iter: 3 }, // Defenders
+    { number: 3, x: 0.5, y: 0.75, team: 'away', iter: 3 },
+    { number: 4, x: 0.7, y: 0.75, team: 'away', iter: 3 },
+    { number: 5, x: 0.3, y: 0.6, team: 'away', iter: 3 }, // Midfielders
+    { number: 6, x: 0.5, y: 0.6, team: 'away', iter: 3 },
+    { number: 7, x: 0.7, y: 0.6, team: 'away', iter: 3 },
+    { number: 8, x: 0.3, y: 0.45, team: 'away', iter: 3 }, // Forwards
+    { number: 9, x: 0.5, y: 0.45, team: 'away', iter: 3 },
+    { number: 10, x: 0.7, y: 0.45, team: 'away', iter: 3 },
+    { number: 11, x: 0.5, y: 0.35, team: 'away', iter: 3 }
   ]
 
   return [...homeTeam, ...awayTeam]
@@ -74,10 +74,34 @@ function App() {
             const randomX = (Math.random() - 0.5) * 0.005
             const randomY = (Math.random() - 0.5) * 0.005
             
+            const newX = Math.max(0.1, Math.min(0.9, player.x + dx + randomX))
+            const newY = Math.max(0.1, Math.min(0.9, player.y + dy + randomY))
+            
+            // Check if player is moving
+            const isMoving = Math.abs(newX - player.x) > 0.001 || Math.abs(newY - player.y) > 0.001
+            
+            // Update animation frame
+            let newIter = player.iter
+            if (isMoving) {
+              // Cycle through full animation cycle 0-13 (creates ping-pong effect for 7 poses)
+              newIter = (player.iter + 1) % 14
+            } else {
+              // When not moving, use standing pose (frame 3)
+              newIter = 3
+            }
+            
+            // Convert iter to pose (0-6 with ping-pong effect)
+            let pose = newIter
+            if (newIter > 6) {
+              pose = 13 - newIter
+            }
+            
             return {
               ...player,
-              x: Math.max(0.1, Math.min(0.9, player.x + dx + randomX)),
-              y: Math.max(0.1, Math.min(0.9, player.y + dy + randomY))
+              x: newX,
+              y: newY,
+              iter: newIter,
+              pose: pose
             }
           })
         )
