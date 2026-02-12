@@ -31,8 +31,12 @@ import java.util.Map;
 @RequestMapping("/api")
 public class TacticsController {
 
+    private final TacticService tacticService;
+
     @Autowired
-    private TacticService tacticService;
+    public TacticsController(TacticService tacticService) {
+        this.tacticService = tacticService;
+    }
 
     /**
      * Lists all available tactics.

@@ -3,6 +3,7 @@ package com.javacup.backend.service;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,39 +21,45 @@ import java.util.List;
 public class TacticService {
 
     /**
+     * Available tactics from the 2013 competition.
+     * Each tactic represents a unique team AI implementation.
+     */
+    private static final List<String> AVAILABLE_TACTICS = Arrays.asList(
+        "Ciclones",
+        "JGTeam",
+        "Ander",
+        "Cucaracha",
+        "DyMCupcakes",
+        "Elaga",
+        "Enavas",
+        "Espinete",
+        "FelipeMoraTeam",
+        "Frioleros",
+        "Jhontona",
+        "Kpacha",
+        "Masia13",
+        "Novena",
+        "Pistachos",
+        "Romedal",
+        "SitiosTactic2",
+        "TheShadows",
+        "Toulousains",
+        "TwentyThree",
+        "Txami",
+        "Valedores",
+        "AdamTeam"
+    );
+
+    /**
      * Returns a list of all available tactic names.
      * <p>
      * These tactics are available for match selection. Each tactic name
      * represents a unique team AI implementation from the 2013 competition.
      * </p>
      * 
-     * @return list of tactic names
+     * @return unmodifiable list of tactic names
      */
     public List<String> getAllTactics() {
-        return Arrays.asList(
-            "Ciclones",
-            "JGTeam",
-            "Ander",
-            "Cucaracha",
-            "DyMCupcakes",
-            "Elaga",
-            "Enavas",
-            "Espinete",
-            "FelipeMoraTeam",
-            "Frioleros",
-            "Jhontona",
-            "Kpacha",
-            "Masia13",
-            "Novena",
-            "Pistachos",
-            "Romedal",
-            "SitiosTactic2",
-            "TheShadows",
-            "Toulousains",
-            "TwentyThree",
-            "Txami",
-            "Valedores",
-            "AdamTeam"
-        );
+        return Collections.unmodifiableList(AVAILABLE_TACTICS);
     }
 }
