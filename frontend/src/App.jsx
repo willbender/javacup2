@@ -83,7 +83,7 @@ function App() {
             // Update animation frame
             let newIter = player.iter
             if (isMoving) {
-              // Cycle through animation frames 0-13
+              // Cycle through full animation cycle 0-13 (creates ping-pong effect for 7 poses)
               newIter = (player.iter + 1) % 14
             } else {
               // When not moving, use standing pose (frame 3)
