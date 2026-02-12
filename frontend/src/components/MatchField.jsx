@@ -21,6 +21,9 @@ const GOAL_HEIGHT = 20
 const GOAL_TOP_OFFSET = 10
 const GOAL_BOTTOM_OFFSET = 30
 
+// Helper function to generate sprite keys
+const getSpriteKey = (style, pose) => `${style}${pose}`
+
 const MatchField = ({ players, ball }) => {
   const canvasRef = useRef(null)
   const [images, setImages] = useState({
@@ -64,7 +67,8 @@ const MatchField = ({ players, ball }) => {
         // Load player sprites (style 1 - default)
         const playerSprites = {}
         for (let i = MIN_PLAYER_POSE; i <= MAX_PLAYER_POSE; i++) {
-          playerSprites[`${DEFAULT_PLAYER_STYLE}${i}`] = await loadImage(`/images/player/${DEFAULT_PLAYER_STYLE}${i}.png`)
+          const key = getSpriteKey(DEFAULT_PLAYER_STYLE, i)
+          playerSprites[key] = await loadImage(`/images/player/${key}.png`)
         }
 
         setImages({
@@ -128,7 +132,7 @@ const MatchField = ({ players, ball }) => {
         }
 
         // Draw player sprite or fallback to circle
-        const spriteKey = `${DEFAULT_PLAYER_STYLE}${player.pose || 0}`
+        const spriteKey = getSpriteKey(DEFAULT_PLAYER_STYLE, player.pose || 0)
         if (images.playerSprites[spriteKey]) {
           ctx.drawImage(images.playerSprites[spriteKey], x - PLAYER_SPRITE_OFFSET, y - PLAYER_SPRITE_OFFSET, PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)
         } else {
