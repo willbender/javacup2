@@ -11,11 +11,13 @@ The backend follows a layered architecture pattern with clear separation of conc
 - **Purpose**: Handles HTTP requests and responses
 - **Current Controllers**:
   - `HealthController`: Provides health check and application info endpoints
+  - `MatchController`: Runs matches and provides match-related endpoints
 
-### 2. **Service Layer** (Future)
+### 2. **Service Layer**
 - **Location**: `src/main/java/com/javacup/backend/service/`
 - **Purpose**: Contains business logic and orchestrates data flow between controllers and repositories
-- **Status**: To be implemented as business requirements evolve
+- **Current Services**:
+  - `TacticService`: Manages and loads tactics by name
 
 ### 3. **Repository Layer** (Future)
 - **Location**: `src/main/java/com/javacup/backend/repository/`
@@ -165,6 +167,62 @@ The application will start on port 8080 by default.
     "description": "Backend service for JavaCup project"
   }
   ```
+
+### Match Endpoints
+
+#### Get Available Tactics
+- **URL**: `GET /api/match/tactics`
+- **Description**: Returns a list of available tactics that can be used in matches
+- **Response**:
+  ```json
+  {
+    "tactics": ["SimpleTactic", "DefaultHome", "DefaultAway"],
+    "count": 3
+  }
+  ```
+
+#### Run a Match
+- **URL**: `POST /api/match/run`
+- **Description**: Runs a complete match (60 seconds, 3600 iterations) between two tactics
+- **Request Body**:
+  ```json
+  {
+    "homeTacticName": "SimpleTactic",
+    "awayTacticName": "DefaultHome"
+  }
+  ```
+- **Success Response** (200 OK):
+  ```json
+  {
+    "homeTeamName": "SimpleTactic",
+    "awayTeamName": "DefaultHome",
+    "homeGoals": 0,
+    "awayGoals": 0,
+    "totalIterations": 3600,
+    "homePossession": 0.48,
+    "awayPossession": 0.52,
+    "finalBallPosition": {
+      "x": 0.0,
+      "y": 3.5
+    },
+    "finalHomePositions": [...],
+    "finalAwayPositions": [...],
+    "result": "Draw!"
+  }
+  ```
+- **Error Response** (404 Not Found):
+  ```json
+  {
+    "error": "Tactic(s) not found: NonExistentTactic",
+    "missingTactics": ["NonExistentTactic"],
+    "availableTactics": ["SimpleTactic", "DefaultHome", "DefaultAway"]
+  }
+  ```
+- **Notes**:
+  - No authentication required
+  - Match runs for full 60 seconds (3600 iterations at 60 iterations/second)
+  - Returns comprehensive match statistics including score, possession, and final positions
+  - If one or both tactics don't exist, returns HTTP 404 with helpful error message
 
 ## Configuration
 
