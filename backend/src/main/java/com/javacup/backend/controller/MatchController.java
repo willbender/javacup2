@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * REST controller for match operations.
@@ -75,7 +76,8 @@ public class MatchController {
             Match match = new Match(homeTactic, awayTactic, false);
             
             // Run for full match duration (60 seconds * 60 iterations per second = 3600 iterations)
-            for (int i = 0; i < Constants.TOTAL_ITERATIONS - 1; i++) {
+            // Match constructor already runs the first iteration, so we run TOTAL_ITERATIONS - 1 more
+            for (int i = 1; i < Constants.TOTAL_ITERATIONS; i++) {
                 match.iterate();
             }
             
@@ -119,9 +121,10 @@ public class MatchController {
     public ResponseEntity<Map<String, Object>> getAvailableTactics() {
         log.debug("Getting available tactics");
         
+        Set<String> tactics = tacticService.getAvailableTactics();
         Map<String, Object> response = new HashMap<>();
-        response.put("tactics", tacticService.getAvailableTactics());
-        response.put("count", tacticService.getAvailableTactics().size());
+        response.put("tactics", tactics);
+        response.put("count", tactics.size());
         
         return ResponseEntity.ok(response);
     }
