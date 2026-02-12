@@ -456,6 +456,11 @@ public final class Match implements MatchInterface {
         // Update game situations for tactics
         updateGameSituations();
         
+        // Record iteration if recording is enabled
+        if (shouldRecord && savedMatch != null) {
+            recordIteration();
+        }
+        
         log.trace("Iteration {} complete: ball={}, altitude={}", 
                  iteration, ball, ballAltitude);
     }
@@ -798,5 +803,34 @@ public final class Match implements MatchInterface {
             homeAcceleration, awayEnergy, homeEnergy, awayKicksOff, homeKicksOff,
             kickCooldown[1], kickCooldown[0], trajectory, -trajectoryX0, -trajectoryY0,
             trajectoryT0, trajectoryAngle0 + Math.PI, realIteration, true);
+    }
+    
+    /**
+     * Records the current iteration to the saved match.
+     */
+    private void recordIteration() {
+        Position[][] positions = new Position[3][];
+        positions[0] = homePositions;
+        positions[1] = awayPositions;
+        positions[2] = new Position[]{ball};
+        
+        Iteration iterationSnapshot = new Iteration(
+            goal, goalpost, bouncing, cheering, kicking,
+            homeKicksOff || awayKicksOff, whistling, setPieceChanged,
+            offside, indirectFreeKick, ballAltitude, visibleBall,
+            positions, iteration, homeGoals, awayGoals, getHomePossession()
+        );
+        
+        savedMatch.addIteration(iterationSnapshot);
+    }
+    
+    /**
+     * Finalizes the saved match with final results.
+     * Should be called after the match is complete.
+     */
+    public void finalizeSavedMatch() {
+        if (shouldRecord && savedMatch != null) {
+            savedMatch.setFinalResults(homeGoals, awayGoals, getHomePossession());
+        }
     }
 }

@@ -2,24 +2,27 @@ package com.javacup.model.engine;
 
 import com.javacup.model.TacticDetail;
 import com.javacup.model.util.Position;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Mock implementation of SavedMatch for compilation purposes.
+ * Complete implementation of SavedMatch for storing and replaying matches.
  * <p>
- * This is a placeholder class that will be fully implemented in a future session.
- * The actual implementation should handle match serialization, deserialization,
- * and replay functionality.
+ * This class stores all match data including:
+ * <ul>
+ *   <li>Team tactics and configurations</li>
+ *   <li>All iterations with player positions and ball state</li>
+ *   <li>Match events (goals, kicks, offsides, etc.)</li>
+ *   <li>Final match results (score, possession)</li>
+ * </ul>
  * </p>
  * <p>
- * <strong>TODO:</strong> Complete implementation with:
- * <ul>
- *   <li>Match data storage and compression</li>
- *   <li>Save/load to/from files</li>
- *   <li>Replay functionality</li>
- *   <li>ZIP file handling</li>
- * </ul>
+ * The data can be serialized to JSON for storage and transmission.
  * </p>
  * 
  * @author JavaCup Team
@@ -29,8 +32,62 @@ public final class SavedMatch implements MatchInterface, Serializable {
 
     private static final long serialVersionUID = 1L;
     
+    @JsonIgnore
     private final TacticDetail homeDetail;
+    
+    @JsonIgnore
     private final TacticDetail awayDetail;
+    
+    @JsonProperty("homeTeam")
+    private final TacticDetailJson homeTeamJson;
+    
+    @JsonProperty("awayTeam")
+    private final TacticDetailJson awayTeamJson;
+    
+    @JsonIgnore
+    private final List<Iteration> iterations;
+    
+    @JsonProperty("iterations")
+    private List<IterationJson> iterationsJson;
+    
+    @JsonProperty("finalHomeGoals")
+    private int finalHomeGoals;
+    
+    @JsonProperty("finalAwayGoals")
+    private int finalAwayGoals;
+    
+    @JsonProperty("finalHomePossession")
+    private double finalHomePossession;
+    
+    @JsonIgnore
+    private int currentIterationIndex = 0;
+    
+    /**
+     * Gets the final home goals.
+     *
+     * @return final home goals
+     */
+    public int getFinalHomeGoals() {
+        return finalHomeGoals;
+    }
+    
+    /**
+     * Gets the final away goals.
+     *
+     * @return final away goals
+     */
+    public int getFinalAwayGoals() {
+        return finalAwayGoals;
+    }
+    
+    /**
+     * Gets the final home possession.
+     *
+     * @return final home possession
+     */
+    public double getFinalHomePossession() {
+        return finalHomePossession;
+    }
 
     /**
      * Creates a saved match with team details.
@@ -41,115 +98,265 @@ public final class SavedMatch implements MatchInterface, Serializable {
     public SavedMatch(TacticDetail homeDetail, TacticDetail awayDetail) {
         this.homeDetail = homeDetail;
         this.awayDetail = awayDetail;
+        this.homeTeamJson = new TacticDetailJson(homeDetail);
+        this.awayTeamJson = new TacticDetailJson(awayDetail);
+        this.iterations = new ArrayList<>();
+        this.finalHomeGoals = 0;
+        this.finalAwayGoals = 0;
+        this.finalHomePossession = 0.0;
+    }
+    
+    /**
+     * Adds an iteration snapshot to the saved match.
+     *
+     * @param iteration the iteration to add
+     */
+    void addIteration(Iteration iteration) {
+        iterations.add(iteration);
+    }
+    
+    /**
+     * Sets the final match results.
+     *
+     * @param homeGoals final home team goals
+     * @param awayGoals final away team goals
+     * @param homePossession final home possession percentage
+     */
+    void setFinalResults(int homeGoals, int awayGoals, double homePossession) {
+        this.finalHomeGoals = homeGoals;
+        this.finalAwayGoals = awayGoals;
+        this.finalHomePossession = homePossession;
+        
+        // Convert all iterations to JSON-friendly format
+        this.iterationsJson = new ArrayList<>();
+        for (Iteration iter : iterations) {
+            iterationsJson.add(new IterationJson(iter));
+        }
+    }
+    
+    /**
+     * Gets the total number of iterations recorded.
+     *
+     * @return number of iterations
+     */
+    public int getTotalIterations() {
+        return iterations.size();
+    }
+    
+    /**
+     * Gets a specific iteration by index.
+     *
+     * @param index iteration index
+     * @return the iteration at the specified index
+     */
+    public Iteration getIterationAt(int index) {
+        if (index < 0 || index >= iterations.size()) {
+            throw new IndexOutOfBoundsException("Iteration index out of bounds: " + index);
+        }
+        return iterations.get(index);
+    }
+    
+    /**
+     * Gets the current iteration for replay.
+     *
+     * @return current iteration or null if no more iterations
+     */
+    private Iteration getCurrentIteration() {
+        if (currentIterationIndex >= iterations.size()) {
+            return null;
+        }
+        return iterations.get(currentIterationIndex);
     }
 
+    @JsonIgnore
     @Override
     public boolean isGoal() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isGoal();
     }
 
+    @JsonIgnore
     @Override
     public boolean isGoalpost() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isGoalpost();
     }
 
+    @JsonIgnore
     @Override
     public boolean isBouncing() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isBouncing();
     }
 
+    @JsonIgnore
     @Override
     public boolean isCheering() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isCheering();
     }
 
+    @JsonIgnore
     @Override
     public boolean isKicking() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isKicking();
     }
 
+    @JsonIgnore
     @Override
     public boolean isTakingSetPiece() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isTakingSetPiece();
     }
 
+    @JsonIgnore
     @Override
     public boolean isWhistling() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isWhistling();
     }
 
+    @JsonIgnore
     @Override
     public double getBallAltitude() {
-        return 0;
+        Iteration current = getCurrentIteration();
+        return current != null ? Iteration.decompress(current.getBallHeight()) : 0;
     }
 
+    @JsonIgnore
     @Override
     public boolean wasRecorded() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isSetPieceChanged() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isSetPieceChanged();
     }
 
+    @JsonIgnore
     @Override
     public TacticDetail getHomeDetail() {
         return homeDetail;
     }
 
+    @JsonIgnore
     @Override
     public TacticDetail getAwayDetail() {
         return awayDetail;
     }
 
+    @JsonIgnore
     @Override
     public SavedMatch getSavedMatch() {
         return this;
     }
 
+    @JsonIgnore
     @Override
     public Position getVisibleBallPosition() {
-        return new Position();
+        Iteration current = getCurrentIteration();
+        if (current == null) {
+            return new Position();
+        }
+        return new Position(
+            Iteration.decompress(current.getVisibleBallX()),
+            Iteration.decompress(current.getVisibleBallY())
+        );
     }
 
+    @JsonIgnore
     @Override
     public Position[][] getPositions() {
-        return new Position[3][11];
+        Iteration current = getCurrentIteration();
+        if (current == null) {
+            return new Position[3][11];
+        }
+        
+        short[][][] compressedPositions = current.getPositions();
+        Position[][] positions = new Position[3][];
+        
+        // Home team
+        positions[0] = new Position[11];
+        for (int i = 0; i < 11; i++) {
+            positions[0][i] = new Position(
+                Iteration.decompress(compressedPositions[0][i][0]),
+                Iteration.decompress(compressedPositions[0][i][1])
+            );
+        }
+        
+        // Away team
+        positions[1] = new Position[11];
+        for (int i = 0; i < 11; i++) {
+            positions[1][i] = new Position(
+                Iteration.decompress(compressedPositions[1][i][0]),
+                Iteration.decompress(compressedPositions[1][i][1])
+            );
+        }
+        
+        // Ball
+        positions[2] = new Position[1];
+        positions[2][0] = new Position(
+            Iteration.decompress(compressedPositions[2][0][0]),
+            Iteration.decompress(compressedPositions[2][0][1])
+        );
+        
+        return positions;
     }
 
+    @JsonIgnore
     @Override
     public void iterate() throws Exception {
-        // No-op for saved match
+        if (currentIterationIndex < iterations.size()) {
+            currentIterationIndex++;
+        }
     }
 
+    @JsonIgnore
     @Override
     public int getHomeGoals() {
-        return 0;
+        Iteration current = getCurrentIteration();
+        return current != null ? current.getHomeGoals() : finalHomeGoals;
     }
 
+    @JsonIgnore
     @Override
     public int getAwayGoals() {
-        return 0;
+        Iteration current = getCurrentIteration();
+        return current != null ? current.getAwayGoals() : finalAwayGoals;
     }
 
+    @JsonIgnore
     @Override
     public int getIteration() {
-        return 0;
+        Iteration current = getCurrentIteration();
+        return current != null ? current.getIteration() : iterations.size();
     }
 
+    @JsonIgnore
     @Override
     public double getHomePossession() {
-        return 0;
+        Iteration current = getCurrentIteration();
+        if (current != null) {
+            return Iteration.decompress(current.getHomePossessionPercent());
+        }
+        return finalHomePossession;
     }
 
+    @JsonIgnore
     @Override
     public boolean isOffside() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isOffside();
     }
 
+    @JsonIgnore
     @Override
     public boolean isIndirectFreeKick() {
-        return false;
+        Iteration current = getCurrentIteration();
+        return current != null && current.isIndirectFreeKick();
     }
 }
