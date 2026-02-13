@@ -11,6 +11,7 @@ The backend follows a layered architecture pattern with clear separation of conc
 - **Purpose**: Handles HTTP requests and responses
 - **Current Controllers**:
   - `HealthController`: Provides health check and application info endpoints
+  - `MatchController`: Runs matches and provides match-related endpoints
   - `TacticsController`: Provides endpoints to list available tactics
 
 ### 2. **Service Layer**
@@ -168,6 +169,81 @@ The application will start on port 8080 by default.
   }
   ```
 
+### Match Endpoints
+
+#### Get Available Tactics
+- **URL**: `GET /api/match/tactics`
+- **Description**: Returns a list of available tactics that can be used in matches
+- **Response**:
+  ```json
+  {
+    "tactics": ["SimpleTactic", "DefaultHome", "DefaultAway"],
+    "count": 3
+  }
+  ```
+
+#### Run a Match
+- **URL**: `POST /api/match/run`
+- **Description**: Runs a complete match (60 seconds, 3600 iterations) between two tactics and returns a complete SavedMatch object with all match data
+- **Request Body**:
+  ```json
+  {
+    "homeTacticName": "SimpleTactic",
+    "awayTacticName": "DefaultHome"
+  }
+  ```
+- **Success Response** (200 OK):
+  Returns a SavedMatch object with complete match data:
+  ```json
+  {
+    "totalIterations": 3600,
+    "homeTeam": {
+      "teamName": "SimpleTactic",
+      "country": "Test Country",
+      "coach": "Test Coach",
+      "players": [...]
+    },
+    "awayTeam": {
+      "teamName": "DefaultHome",
+      "country": "Test Country",
+      "coach": "Test Coach",
+      "players": [...]
+    },
+    "finalHomeGoals": 0,
+    "finalAwayGoals": 0,
+    "finalHomePossession": 0.48,
+    "iterations": [
+      {
+        "iteration": 1,
+        "homeGoals": 0,
+        "awayGoals": 0,
+        "ballHeight": 0,
+        "visibleBallX": 0,
+        "visibleBallY": 0,
+        "positions": [...],
+        "events": {...}
+      },
+      ...
+    ]
+  }
+  ```
+  The response includes:
+  - Team configurations (names, players, etc.)
+  - Final score and possession statistics
+  - All 3600 iterations with player positions, ball state, and events for replay purposes
+- **Error Response** (404 Not Found):
+  ```json
+  {
+    "error": "Tactic(s) not found: NonExistentTactic",
+    "missingTactics": ["NonExistentTactic"],
+    "availableTactics": ["SimpleTactic", "DefaultHome", "DefaultAway"]
+  }
+  ```
+- **Notes**:
+  - No authentication required
+  - Match runs for full 60 seconds (3600 iterations at 60 iterations/second)
+  - Returns comprehensive match statistics including score, possession, and final positions
+  - If one or both tactics don't exist, returns HTTP 404 with helpful error message
 ### List Tactics
 - **URL**: `GET /api/tactics`
 - **Description**: Returns a list of all available tactics (team AI strategies) that can be selected for a match. The list is dynamically discovered by scanning the `com.javacup.tactics` package for implementations of the `Tactic` interface. Each subdirectory under the tactics package represents a unique tactic. No authentication required.
