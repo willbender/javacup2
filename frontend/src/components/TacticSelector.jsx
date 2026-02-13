@@ -11,8 +11,8 @@ const TacticSelector = ({ label, selectedTactic, onTacticChange, tactics }) => {
       >
         <option value="">Select a tactic...</option>
         {tactics.map((tactic) => (
-          <option key={tactic.id} value={tactic.id}>
-            {tactic.name}
+          <option key={tactic} value={tactic}>
+            {tactic}
           </option>
         ))}
       </select>

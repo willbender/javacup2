@@ -133,6 +133,12 @@ h1 {
   border-left: 4px solid #667eea;
 }
 
+.match-status h3 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 1.2rem;
+}
+
 .status-active {
   color: #4CAF50;
   font-weight: bold;
@@ -144,6 +150,46 @@ h1 {
   color: #555;
   margin: 8px 0;
   font-size: 14px;
+}
+
+.possession-info,
+.iterations-info {
+  color: #666;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.error-message {
+  padding: 12px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.loading-message {
+  padding: 12px;
+  background: #ffc;
+  border: 1px solid #ffb;
+  border-radius: 6px;
+  color: #660;
+  margin-bottom: 15px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.create-match-btn:disabled,
+.reset-match-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.create-match-btn:disabled:hover,
+.reset-match-btn:disabled:hover {
+  box-shadow: none;
 }
 
 .field-container {
