@@ -265,9 +265,10 @@ public final class Match implements MatchInterface {
         };
         
         // Initialize players at their starting positions (home kicks off)
+        // Away team positions must be inverted since tactics are defined from home perspective
         for (int i = 0; i < 11; i++) {
             homePositions[i] = new Position(homeStart[i]);
-            awayPositions[i] = new Position(awayNoStart[i]);
+            awayPositions[i] = awayNoStart[i].getInvertedPosition();
         }
         
         matchState = STATE_PLAYING; // Start playing immediately
