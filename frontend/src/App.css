@@ -139,6 +139,47 @@ h1 {
   font-size: 1.2rem;
 }
 
+.match-status h4 {
+  margin-top: 12px;
+  margin-bottom: 8px;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.current-score {
+  padding: 12px;
+  background: #e8f0ff;
+  border-radius: 6px;
+  border: 2px solid #667eea;
+  margin-bottom: 12px;
+}
+
+.current-score h4 {
+  color: #667eea;
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.score-large {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.final-result {
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.final-result h4 {
+  color: #666;
+  margin-top: 0;
+  font-size: 0.95rem;
+}
+
 .status-active {
   color: #4CAF50;
   font-weight: bold;
@@ -157,6 +198,101 @@ h1 {
   color: #666;
   margin: 8px 0;
   font-size: 13px;
+}
+
+.playback-controls {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 2px solid #ddd;
+}
+
+.playback-controls h4 {
+  margin-bottom: 12px;
+  color: #333;
+  font-size: 1rem;
+}
+
+.playback-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.playback-btn {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  color: #667eea;
+}
+
+.playback-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.playback-btn:active {
+  transform: translateY(0);
+}
+
+.playback-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.playback-slider label {
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+}
+
+.slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #ddd;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #764ba2;
+  transform: scale(1.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  background: #764ba2;
+  transform: scale(1.2);
 }
 
 .error-message {

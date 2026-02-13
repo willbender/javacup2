@@ -50,6 +50,10 @@ function App() {
   const [backendAvailable, setBackendAvailable] = useState(true)
   const [matchResult, setMatchResult] = useState(null)
   const [error, setError] = useState(null)
+  const [currentIteration, setCurrentIteration] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentHomeGoals, setCurrentHomeGoals] = useState(0)
+  const [currentAwayGoals, setCurrentAwayGoals] = useState(0)
 
   // Fetch tactics from backend on component mount
   useEffect(() => {
@@ -84,75 +88,110 @@ function App() {
   // Initialize sound system
   const { toggleSounds } = useMatchSounds(matchStarted)
 
-  // Simple animation when match is running - use actual match data if available
+  // Helper function to update display for a specific iteration
+  const updateIterationDisplay = (iterationIndex) => {
+    if (!matchResult?.iterations || iterationIndex >= matchResult.iterations.length) return
+
+    const iteration = matchResult.iterations[iterationIndex]
+    
+    // Update current goals from this iteration
+    if (iteration.homeGoals !== undefined && iteration.awayGoals !== undefined) {
+      setCurrentHomeGoals(iteration.homeGoals)
+      setCurrentAwayGoals(iteration.awayGoals)
+    }
+    
+    // Backend coordinate system (in meters, centered at origin):
+    // IMPORTANT: The Position class comment has X and Y backwards!
+    // Actual usage in Constants.java shows:
+    //   X: -34 to +34 (68m total, FIELD_WIDTH) - left to right
+    //   Y: -52.5 to +52.5 (105m total, FIELD_LENGTH) - goal to goal
+    // Total grass area (including margins):
+    //   X: -36.5 to +36.5 (73m total, TOTAL_WIDTH)
+    //   Y: -56.5 to +56.5 (113m total, TOTAL_LENGTH)
+    //
+    // Frontend coordinate system (normalized 0-1):
+    // x: 0-1 (left to right, width direction)
+    // y: 0-1 (top to bottom, length direction, goals at top y≈0.1 and bottom y≈0.9)
+    //
+    // Transformation (NO axis swap needed):
+    // frontend_x = (backend_x + 36.5) / 73   // width to width
+    // frontend_y = (backend_y + 56.5) / 113  // length to length
+    const normalizeX = (backendX) => (backendX + 36.5) / 73
+    const normalizeY = (backendY) => (backendY + 56.5) / 113
+    
+    // Update ball position from ballX and ballY
+    if (iteration.ballX !== undefined && iteration.ballY !== undefined) {
+      setBall({ 
+        x: normalizeX(iteration.ballX), // backend X → frontend x (width)
+        y: normalizeY(iteration.ballY)  // backend Y → frontend y (length)
+      })
+    }
+
+    // Update player positions from separate arrays
+    if (iteration.homePlayerX && iteration.homePlayerY && 
+        iteration.awayPlayerX && iteration.awayPlayerY) {
+      
+      const updatedPlayers = []
+      
+      // Calculate animation frame
+      const animFrame = iterationIndex % 14
+      const pose = animFrame > 6 ? 13 - animFrame : animFrame
+      
+      // Add home team players
+      for (let i = 0; i < iteration.homePlayerX.length; i++) {
+        updatedPlayers.push({
+          number: i + 1,
+          x: normalizeX(iteration.homePlayerX[i]), // backend X → frontend x (width)
+          y: normalizeY(iteration.homePlayerY[i]), // backend Y → frontend y (length)
+          team: 'home',
+          iter: animFrame,
+          pose: pose
+        })
+      }
+      
+      // Add away team players
+      for (let i = 0; i < iteration.awayPlayerX.length; i++) {
+        updatedPlayers.push({
+          number: i + 1,
+          x: normalizeX(iteration.awayPlayerX[i]), // backend X → frontend x (width)
+          y: normalizeY(iteration.awayPlayerY[i]), // backend Y → frontend y (length)
+          team: 'away',
+          iter: animFrame,
+          pose: pose
+        })
+      }
+      
+      setPlayers(updatedPlayers)
+    }
+  }
+
+  // Auto-play animation when playing
+  useEffect(() => {
+    if (!isPlaying || !matchResult?.iterations) return
+
+    const interval = setInterval(() => {
+      setCurrentIteration(prev => {
+        const next = prev + 1
+        if (next >= matchResult.iterations.length) {
+          setIsPlaying(false)
+          return matchResult.iterations.length - 1
+        }
+        return next
+      })
+    }, 50) // Update every 50ms for smoother animation
+
+    return () => clearInterval(interval)
+  }, [isPlaying, matchResult])
+
+  // Update display when currentIteration changes
   useEffect(() => {
     if (!matchStarted || !matchResult) return
 
-    // If we have match result data, animate through the iterations
-    if (matchResult.iterationsJson && matchResult.iterationsJson.length > 0) {
-      let currentIteration = 0
-      const totalIterations = matchResult.iterationsJson.length
-
-      const interval = setInterval(() => {
-        if (currentIteration >= totalIterations) {
-          clearInterval(interval)
-          return
-        }
-
-        const iteration = matchResult.iterationsJson[currentIteration]
-        
-        // Update ball position
-        if (iteration.visibleBallPosition) {
-          setBall({ 
-            x: iteration.visibleBallPosition.x, 
-            y: iteration.visibleBallPosition.y 
-          })
-        }
-
-        // Update player positions
-        if (iteration.positions && iteration.positions.length === 2) {
-          const homePositions = iteration.positions[0]
-          const awayPositions = iteration.positions[1]
-          
-          const updatedPlayers = []
-          
-          // Calculate animation frame once
-          const animFrame = currentIteration % 14
-          const pose = animFrame > 6 ? 13 - animFrame : animFrame
-          
-          // Add home team players
-          homePositions.forEach((pos, index) => {
-            updatedPlayers.push({
-              number: index + 1,
-              x: pos.x,
-              y: pos.y,
-              team: 'home',
-              iter: animFrame,
-              pose: pose
-            })
-          })
-          
-          // Add away team players
-          awayPositions.forEach((pos, index) => {
-            updatedPlayers.push({
-              number: index + 1,
-              x: pos.x,
-              y: pos.y,
-              team: 'away',
-              iter: animFrame,
-              pose: pose
-            })
-          })
-          
-          setPlayers(updatedPlayers)
-        }
-
-        currentIteration++
-      }, 50) // Update every 50ms for smoother animation
-
-      return () => clearInterval(interval)
+    // If we have match result data, update the display
+    if (matchResult.iterations && matchResult.iterations.length > 0) {
+      updateIterationDisplay(currentIteration)
     }
-  }, [matchStarted, matchResult])
+  }, [currentIteration, matchStarted, matchResult])
 
   const handleToggleSounds = () => {
     const newState = toggleSounds()
@@ -180,12 +219,14 @@ function App() {
       // Store the match result
       setMatchResult(result)
       setMatchStarted(true)
+      setCurrentIteration(0)
+      setIsPlaying(true) // Auto-start playback
       
       console.log('Match completed:', {
         homeTeam: result.homeTeam?.teamName,
         awayTeam: result.awayTeam?.teamName,
         score: `${result.finalHomeGoals} - ${result.finalAwayGoals}`,
-        iterations: result.totalIterations
+        iterations: result.iterations?.length || 0
       })
     } catch (err) {
       console.error('Failed to run match:', err)
@@ -200,6 +241,10 @@ function App() {
     setMatchResult(null)
     setPlayers(getInitialPlayers())
     setBall({ x: 0.5, y: 0.5 })
+    setCurrentIteration(0)
+    setIsPlaying(false)
+    setCurrentHomeGoals(0)
+    setCurrentAwayGoals(0)
   }
 
   return (
@@ -269,13 +314,66 @@ function App() {
           
           {matchResult && (
             <div className="match-status">
-              <h3>Match Result</h3>
-              <p className="team-info">🔴 {matchResult.homeTeam?.teamName || homeTacticName}: {matchResult.finalHomeGoals} goals</p>
-              <p className="team-info">🔵 {matchResult.awayTeam?.teamName || awayTacticName}: {matchResult.finalAwayGoals} goals</p>
-              <p className="possession-info">
-                Possession: {matchResult.homeTeam?.teamName || homeTacticName} {(matchResult.finalHomePossession * 100).toFixed(1)}% - {matchResult.awayTeam?.teamName || awayTacticName} {((1 - matchResult.finalHomePossession) * 100).toFixed(1)}%
-              </p>
-              <p className="iterations-info">Total Iterations: {matchResult.totalIterations}</p>
+              <h3>Match Status</h3>
+              <div className="current-score">
+                <h4>Current Score (Iteration {currentIteration + 1})</h4>
+                <p className="team-info score-large">🔴 {matchResult.homeTeam?.teamName || homeTacticName}: {currentHomeGoals}</p>
+                <p className="team-info score-large">🔵 {matchResult.awayTeam?.teamName || awayTacticName}: {currentAwayGoals}</p>
+              </div>
+              <div className="final-result">
+                <h4>Final Result</h4>
+                <p className="team-info">🔴 {matchResult.homeTeam?.teamName || homeTacticName}: {matchResult.finalHomeGoals} goals</p>
+                <p className="team-info">🔵 {matchResult.awayTeam?.teamName || awayTacticName}: {matchResult.finalAwayGoals} goals</p>
+                <p className="possession-info">
+                  Possession: {matchResult.homeTeam?.teamName || homeTacticName} {(matchResult.finalHomePossession * 100).toFixed(1)}% - {matchResult.awayTeam?.teamName || awayTacticName} {((1 - matchResult.finalHomePossession) * 100).toFixed(1)}%
+                </p>
+                <p className="iterations-info">Total Iterations: {matchResult.iterations?.length || 0}</p>
+              </div>
+              
+              {/* Playback Controls */}
+              <div className="playback-controls">
+                <h4>Match Playback</h4>
+                <div className="playback-buttons">
+                  <button 
+                    onClick={() => setCurrentIteration(0)}
+                    title="Go to start"
+                    className="playback-btn"
+                  >
+                    ⏮️ Start
+                  </button>
+                  <button 
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    title={isPlaying ? "Pause" : "Play"}
+                    className="playback-btn"
+                  >
+                    {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+                  </button>
+                  <button 
+                    onClick={() => setCurrentIteration(matchResult.iterations.length - 1)}
+                    title="Go to end"
+                    className="playback-btn"
+                  >
+                    ⏭️ End
+                  </button>
+                </div>
+                <div className="playback-slider">
+                  <label htmlFor="iteration-slider">
+                    Iteration: {currentIteration + 1} / {matchResult.iterations?.length || 0}
+                  </label>
+                  <input
+                    id="iteration-slider"
+                    type="range"
+                    min="0"
+                    max={Math.max(0, (matchResult.iterations?.length || 1) - 1)}
+                    value={currentIteration}
+                    onChange={(e) => {
+                      setIsPlaying(false)
+                      setCurrentIteration(parseInt(e.target.value))
+                    }}
+                    className="slider"
+                  />
+                </div>
+              </div>
             </div>
           )}
           
