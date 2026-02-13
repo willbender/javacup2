@@ -1,7 +1,6 @@
 package com.javacup.backend.controller;
 
 import com.javacup.backend.dto.MatchRequest;
-import com.javacup.backend.dto.MatchResponse;
 import com.javacup.backend.service.TacticService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -33,22 +32,18 @@ class MatchControllerTest {
         // Use actual tactics registered in TacticService
         MatchRequest request = new MatchRequest("SimpleTactic", "DefaultHome");
         
-        // Execute and verify
+        // Execute and verify - SavedMatch structure
         mockMvc.perform(post("/api/match/run")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.homeTeamName").value("SimpleTactic"))
-                .andExpect(jsonPath("$.awayTeamName").value("DefaultHome"))
-                .andExpect(jsonPath("$.homeGoals").isNumber())
-                .andExpect(jsonPath("$.awayGoals").isNumber())
-                .andExpect(jsonPath("$.totalIterations").value(greaterThan(0)))
-                .andExpect(jsonPath("$.homePossession").isNumber())
-                .andExpect(jsonPath("$.awayPossession").isNumber())
-                .andExpect(jsonPath("$.result").isString())
-                .andExpect(jsonPath("$.finalBallPosition").exists())
-                .andExpect(jsonPath("$.finalHomePositions").isArray())
-                .andExpect(jsonPath("$.finalAwayPositions").isArray());
+                .andExpect(jsonPath("$.homeTeam.teamName").value("SimpleTactic"))
+                .andExpect(jsonPath("$.awayTeam.teamName").value("DefaultHome"))
+                .andExpect(jsonPath("$.finalHomeGoals").isNumber())
+                .andExpect(jsonPath("$.finalAwayGoals").isNumber())
+                .andExpect(jsonPath("$.finalHomePossession").isNumber())
+                .andExpect(jsonPath("$.iterations").isArray())
+                .andExpect(jsonPath("$.iterations", hasSize(greaterThan(0))));
     }
 
     @Test

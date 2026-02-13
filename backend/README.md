@@ -183,7 +183,7 @@ The application will start on port 8080 by default.
 
 #### Run a Match
 - **URL**: `POST /api/match/run`
-- **Description**: Runs a complete match (60 seconds, 3600 iterations) between two tactics
+- **Description**: Runs a complete match (60 seconds, 3600 iterations) between two tactics and returns a complete SavedMatch object with all match data
 - **Request Body**:
   ```json
   {
@@ -192,24 +192,44 @@ The application will start on port 8080 by default.
   }
   ```
 - **Success Response** (200 OK):
+  Returns a SavedMatch object with complete match data:
   ```json
   {
-    "homeTeamName": "SimpleTactic",
-    "awayTeamName": "DefaultHome",
-    "homeGoals": 0,
-    "awayGoals": 0,
     "totalIterations": 3600,
-    "homePossession": 0.48,
-    "awayPossession": 0.52,
-    "finalBallPosition": {
-      "x": 0.0,
-      "y": 3.5
+    "homeTeam": {
+      "teamName": "SimpleTactic",
+      "country": "Test Country",
+      "coach": "Test Coach",
+      "players": [...]
     },
-    "finalHomePositions": [...],
-    "finalAwayPositions": [...],
-    "result": "Draw!"
+    "awayTeam": {
+      "teamName": "DefaultHome",
+      "country": "Test Country",
+      "coach": "Test Coach",
+      "players": [...]
+    },
+    "finalHomeGoals": 0,
+    "finalAwayGoals": 0,
+    "finalHomePossession": 0.48,
+    "iterations": [
+      {
+        "iteration": 1,
+        "homeGoals": 0,
+        "awayGoals": 0,
+        "ballHeight": 0,
+        "visibleBallX": 0,
+        "visibleBallY": 0,
+        "positions": [...],
+        "events": {...}
+      },
+      ...
+    ]
   }
   ```
+  The response includes:
+  - Team configurations (names, players, etc.)
+  - Final score and possession statistics
+  - All 3600 iterations with player positions, ball state, and events for replay purposes
 - **Error Response** (404 Not Found):
   ```json
   {

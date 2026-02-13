@@ -1,13 +1,11 @@
 package com.javacup.backend.controller;
 
 import com.javacup.backend.dto.MatchRequest;
-import com.javacup.backend.dto.MatchResponse;
-import com.javacup.backend.dto.MatchResponse.PositionDTO;
 import com.javacup.backend.service.TacticService;
 import com.javacup.model.Tactic;
 import com.javacup.model.engine.Match;
+import com.javacup.model.engine.SavedMatch;
 import com.javacup.model.util.Constants;
-import com.javacup.model.util.Position;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,7 +36,7 @@ public class MatchController {
      * Runs a match between two tactics.
      *
      * @param request the match request with tactic names
-     * @return the match result
+     * @return the saved match with all match data
      */
     @PostMapping("/run")
     public ResponseEntity<?> runMatch(@RequestBody MatchRequest request) {
@@ -72,8 +70,8 @@ public class MatchController {
             Tactic homeTactic = tacticService.loadTactic(request.getHomeTacticName());
             Tactic awayTactic = tacticService.loadTactic(request.getAwayTacticName());
             
-            // Create and run match
-            Match match = new Match(homeTactic, awayTactic, false);
+            // Create and run match with recording enabled
+            Match match = new Match(homeTactic, awayTactic, true);
             
             // Run for full match duration (60 seconds * 60 iterations per second = 3600 iterations)
             // Match constructor already runs the first iteration, so we run TOTAL_ITERATIONS - 1 more
@@ -84,14 +82,14 @@ public class MatchController {
             // Finalize match
             match.finalizeSavedMatch();
             
-            // Build response
-            MatchResponse response = buildMatchResponse(match);
+            // Get the saved match with all data
+            SavedMatch savedMatch = match.getSavedMatch();
             
             log.info("Match completed: {} {} - {} {}", 
-                    response.getHomeTeamName(), response.getHomeGoals(),
-                    response.getAwayGoals(), response.getAwayTeamName());
+                    savedMatch.getHomeDetail().getTacticName(), savedMatch.getFinalHomeGoals(),
+                    savedMatch.getFinalAwayGoals(), savedMatch.getAwayDetail().getTacticName());
             
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(savedMatch);
             
         } catch (TacticService.TacticNotFoundException e) {
             log.error("Tactic not found", e);
@@ -127,49 +125,5 @@ public class MatchController {
         response.put("count", tactics.size());
         
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Builds match response from match results.
-     */
-    private MatchResponse buildMatchResponse(Match match) {
-        Position[][] positions = match.getPositions();
-        Position ballPosition = positions[2][0];
-        
-        List<PositionDTO> homePositions = new ArrayList<>();
-        for (Position pos : positions[0]) {
-            homePositions.add(PositionDTO.from(pos));
-        }
-        
-        List<PositionDTO> awayPositions = new ArrayList<>();
-        for (Position pos : positions[1]) {
-            awayPositions.add(PositionDTO.from(pos));
-        }
-        
-        double homePossession = match.getHomePossession();
-        double awayPossession = 1.0 - homePossession;
-        
-        String result;
-        if (match.getHomeGoals() > match.getAwayGoals()) {
-            result = match.getHomeDetail().getTacticName() + " wins!";
-        } else if (match.getAwayGoals() > match.getHomeGoals()) {
-            result = match.getAwayDetail().getTacticName() + " wins!";
-        } else {
-            result = "Draw!";
-        }
-        
-        return MatchResponse.builder()
-            .homeTeamName(match.getHomeDetail().getTacticName())
-            .awayTeamName(match.getAwayDetail().getTacticName())
-            .homeGoals(match.getHomeGoals())
-            .awayGoals(match.getAwayGoals())
-            .totalIterations(match.getIteration())
-            .homePossession(homePossession)
-            .awayPossession(awayPossession)
-            .finalBallPosition(PositionDTO.from(ballPosition))
-            .finalHomePositions(homePositions)
-            .finalAwayPositions(awayPositions)
-            .result(result)
-            .build();
     }
 }
