@@ -17,6 +17,8 @@ The easiest way to run the entire JavaCup2 stack is using Docker:
 - Docker or Podman installed on your system
 - Docker Compose (or podman-compose)
 
+For detailed installation instructions and troubleshooting, see [DOCKER.md](DOCKER.md).
+
 ### Running the Stack
 
 #### Linux/macOS
@@ -201,6 +203,14 @@ When contributing to this project:
 2. Test locally with Docker: `./run-stack.sh --command build && ./run-stack.sh --command up`
 3. Ensure all services start successfully
 4. Submit a pull request
+
+For more details on Docker usage, see [DOCKER.md](DOCKER.md).
+
+## Documentation
+
+- [DOCKER.md](DOCKER.md) - Comprehensive Docker setup and troubleshooting guide
+- [backend/README.md](backend/README.md) - Backend API documentation
+- [frontend/README.md](frontend/README.md) - Frontend development guide
 
 ## License
 
