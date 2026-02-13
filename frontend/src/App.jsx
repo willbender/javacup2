@@ -1,17 +1,9 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import MatchField from './components/MatchField'
 import TacticSelector from './components/TacticSelector'
 import { useMatchSounds } from './utils/useMatchSounds'
+import { fetchTactics, runMatch, checkBackendHealth } from './services/api'
 import './App.css'
-
-// Mock tactics data
-const mockTactics = [
-  { id: '1', name: '4-4-2 Classic' },
-  { id: '2', name: '4-3-3 Attacking' },
-  { id: '3', name: '3-5-2 Defensive' },
-  { id: '4', name: '4-2-3-1 Modern' },
-  { id: '5', name: '5-3-2 Counter' }
-]
 
 // Initial player positions (normalized 0-1)
 const getInitialPlayers = () => {
@@ -53,104 +45,157 @@ function App() {
   const [players, setPlayers] = useState(getInitialPlayers())
   const [ball, setBall] = useState({ x: 0.5, y: 0.5 })
   const [soundEnabled, setSoundEnabled] = useState(true)
+  const [tactics, setTactics] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [backendAvailable, setBackendAvailable] = useState(true)
+  const [matchResult, setMatchResult] = useState(null)
+  const [error, setError] = useState(null)
+
+  // Fetch tactics from backend on component mount
+  useEffect(() => {
+    const loadTactics = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Check if backend is available
+        const isHealthy = await checkBackendHealth()
+        setBackendAvailable(isHealthy)
+        
+        if (!isHealthy) {
+          setError('Backend server is not available. Please start the backend.')
+          return
+        }
+        
+        const tacticsList = await fetchTactics()
+        setTactics(tacticsList)
+      } catch (err) {
+        console.error('Failed to load tactics:', err)
+        setError(`Failed to load tactics: ${err.message}`)
+        setBackendAvailable(false)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadTactics()
+  }, [])
 
   // Initialize sound system
   const { playKickSound, toggleSounds } = useMatchSounds(matchStarted)
 
-  // Simple animation when match is running
+  // Simple animation when match is running - use actual match data if available
   useEffect(() => {
-    if (!matchStarted) return
+    if (!matchStarted || !matchResult) return
 
-    const interval = setInterval(() => {
-      // Move ball in a simple pattern
-      setBall(prev => {
-        const newBall = {
-          x: Math.max(0.1, Math.min(0.9, prev.x + (Math.random() - 0.5) * 0.02)),
-          y: Math.max(0.1, Math.min(0.9, prev.y + (Math.random() - 0.5) * 0.02))
+    // If we have match result data, animate through the iterations
+    if (matchResult.iterationsJson && matchResult.iterationsJson.length > 0) {
+      let currentIteration = 0
+      const totalIterations = matchResult.iterationsJson.length
+
+      const interval = setInterval(() => {
+        if (currentIteration >= totalIterations) {
+          clearInterval(interval)
+          return
         }
+
+        const iteration = matchResult.iterationsJson[currentIteration]
         
-        // Play kick sound occasionally when ball moves significantly
-        const ballMoved = Math.abs(newBall.x - prev.x) > 0.015 || Math.abs(newBall.y - prev.y) > 0.015
-        if (ballMoved && Math.random() < 0.15) {
-          playKickSound()
-        }
-        
-        // Animate players moving slightly towards the new ball position
-        setPlayers(prevPlayers => 
-          prevPlayers.map(player => {
-            const dx = (newBall.x - player.x) * 0.01
-            const dy = (newBall.y - player.y) * 0.01
-            
-            // Add some random movement
-            const randomX = (Math.random() - 0.5) * 0.005
-            const randomY = (Math.random() - 0.5) * 0.005
-            
-            const newX = Math.max(0.1, Math.min(0.9, player.x + dx + randomX))
-            const newY = Math.max(0.1, Math.min(0.9, player.y + dy + randomY))
-            
-            // Check if player is moving
-            const isMoving = Math.abs(newX - player.x) > 0.001 || Math.abs(newY - player.y) > 0.001
-            
-            // Update animation frame
-            let newIter = player.iter
-            if (isMoving) {
-              // Cycle through full animation cycle 0-13 (creates ping-pong effect for 7 poses)
-              newIter = (player.iter + 1) % 14
-            } else {
-              // When not moving, use standing pose (frame 3)
-              newIter = 3
-            }
-            
-            // Convert iter to pose (0-6 with ping-pong effect)
-            let pose = newIter
-            if (newIter > 6) {
-              pose = 13 - newIter
-            }
-            
-            return {
-              ...player,
-              x: newX,
-              y: newY,
-              iter: newIter,
-              pose: pose
-            }
+        // Update ball position
+        if (iteration.visibleBallPosition) {
+          setBall({ 
+            x: iteration.visibleBallPosition.x, 
+            y: iteration.visibleBallPosition.y 
           })
-        )
-        
-        return newBall
-      })
-    }, 100) // Update every 100ms
+        }
 
-    return () => clearInterval(interval)
-  }, [matchStarted, playKickSound])
+        // Update player positions
+        if (iteration.positions && iteration.positions.length === 2) {
+          const homePositions = iteration.positions[0]
+          const awayPositions = iteration.positions[1]
+          
+          const updatedPlayers = []
+          
+          // Add home team players
+          homePositions.forEach((pos, index) => {
+            updatedPlayers.push({
+              number: index + 1,
+              x: pos.x,
+              y: pos.y,
+              team: 'home',
+              iter: currentIteration % 14,
+              pose: (currentIteration % 14) > 6 ? 13 - (currentIteration % 14) : (currentIteration % 14)
+            })
+          })
+          
+          // Add away team players
+          awayPositions.forEach((pos, index) => {
+            updatedPlayers.push({
+              number: index + 1,
+              x: pos.x,
+              y: pos.y,
+              team: 'away',
+              iter: currentIteration % 14,
+              pose: (currentIteration % 14) > 6 ? 13 - (currentIteration % 14) : (currentIteration % 14)
+            })
+          })
+          
+          setPlayers(updatedPlayers)
+        }
 
-  const homeTacticName = useMemo(
-    () => mockTactics.find(t => t.id === homeTactic)?.name,
-    [homeTactic]
-  )
-  
-  const awayTacticName = useMemo(
-    () => mockTactics.find(t => t.id === awayTactic)?.name,
-    [awayTactic]
-  )
+        currentIteration++
+      }, 50) // Update every 50ms for smoother animation
 
-  const handleCreateMatch = () => {
-    if (!homeTactic || !awayTactic) {
-      alert('Please select tactics for both teams!')
-      return
+      return () => clearInterval(interval)
     }
-    setMatchStarted(true)
-  }
-
-  const handleResetMatch = () => {
-    setMatchStarted(false)
-    setPlayers(getInitialPlayers())
-    setBall({ x: 0.5, y: 0.5 })
-  }
+  }, [matchStarted, matchResult])
 
   const handleToggleSounds = () => {
     const newState = toggleSounds()
     setSoundEnabled(newState)
+  }
+
+  // Get tactic names for display
+  const homeTacticName = homeTactic
+  const awayTacticName = awayTactic
+
+  const handleCreateMatch = async () => {
+    if (!homeTactic || !awayTactic) {
+      alert('Please select tactics for both teams!')
+      return
+    }
+    
+    try {
+      setLoading(true)
+      setError(null)
+      setMatchResult(null)
+      
+      // Run the match via backend API
+      const result = await runMatch(homeTactic, awayTactic)
+      
+      // Store the match result
+      setMatchResult(result)
+      setMatchStarted(true)
+      
+      console.log('Match completed:', {
+        homeTeam: result.homeTeam?.teamName,
+        awayTeam: result.awayTeam?.teamName,
+        score: `${result.finalHomeGoals} - ${result.finalAwayGoals}`,
+        iterations: result.totalIterations
+      })
+    } catch (err) {
+      console.error('Failed to run match:', err)
+      setError(`Failed to run match: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResetMatch = () => {
+    setMatchStarted(false)
+    setMatchResult(null)
+    setPlayers(getInitialPlayers())
+    setBall({ x: 0.5, y: 0.5 })
   }
 
   return (
@@ -161,18 +206,32 @@ function App() {
         <div className="control-panel">
           <h2>Match Configuration</h2>
           
+          {!backendAvailable && (
+            <div className="error-message">
+              ⚠️ Backend server not available. Please ensure the backend is running on {import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}
+            </div>
+          )}
+          
+          {error && (
+            <div className="error-message">
+              ⚠️ {error}
+            </div>
+          )}
+          
+          {loading && <div className="loading-message">⏳ Loading...</div>}
+          
           <TacticSelector
             label="Home Team Tactic"
             selectedTactic={homeTactic}
             onTacticChange={setHomeTactic}
-            tactics={mockTactics}
+            tactics={tactics}
           />
           
           <TacticSelector
             label="Away Team Tactic"
             selectedTactic={awayTactic}
             onTacticChange={setAwayTactic}
-            tactics={mockTactics}
+            tactics={tactics}
           />
           
           <div className="button-group">
@@ -180,8 +239,9 @@ function App() {
               <button 
                 className="create-match-btn"
                 onClick={handleCreateMatch}
+                disabled={loading || !backendAvailable || !homeTactic || !awayTactic}
               >
-                Create Match
+                {loading ? 'Running Match...' : 'Create Match'}
               </button>
             ) : (
               <button 
@@ -203,7 +263,20 @@ function App() {
             </button>
           </div>
           
-          {matchStarted && (
+          {matchResult && (
+            <div className="match-status">
+              <h3>Match Result</h3>
+              <p className="team-info">🔴 {matchResult.homeTeam?.teamName || homeTacticName}: {matchResult.finalHomeGoals} goals</p>
+              <p className="team-info">🔵 {matchResult.awayTeam?.teamName || awayTacticName}: {matchResult.finalAwayGoals} goals</p>
+              <p className="possession-info">
+                Possession: {matchResult.homeTeam?.teamName || homeTacticName} {(matchResult.finalHomePossession * 100).toFixed(1)}% - 
+                {matchResult.awayTeam?.teamName || awayTacticName} {((1 - matchResult.finalHomePossession) * 100).toFixed(1)}%
+              </p>
+              <p className="iterations-info">Total Iterations: {matchResult.totalIterations}</p>
+            </div>
+          )}
+          
+          {matchStarted && !matchResult && (
             <div className="match-status">
               <p className="status-active">Match is running...</p>
               <p className="team-info">🔴 Home Team: {homeTacticName}</p>
