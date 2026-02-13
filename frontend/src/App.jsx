@@ -52,6 +52,8 @@ function App() {
   const [error, setError] = useState(null)
   const [currentIteration, setCurrentIteration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [currentHomeGoals, setCurrentHomeGoals] = useState(0)
+  const [currentAwayGoals, setCurrentAwayGoals] = useState(0)
 
   // Fetch tactics from backend on component mount
   useEffect(() => {
@@ -92,11 +94,20 @@ function App() {
 
     const iteration = matchResult.iterations[iterationIndex]
     
-    // Update ball position from ballX and ballY
+    // Update current goals from this iteration
+    if (iteration.homeGoals !== undefined && iteration.awayGoals !== undefined) {
+      setCurrentHomeGoals(iteration.homeGoals)
+      setCurrentAwayGoals(iteration.awayGoals)
+    }
+    
+    // Helper function to clamp values between 0 and 1
+    const clamp = (value) => Math.max(0, Math.min(1, value))
+    
+    // Update ball position from ballX and ballY (clamped to field bounds)
     if (iteration.ballX !== undefined && iteration.ballY !== undefined) {
       setBall({ 
-        x: iteration.ballX, 
-        y: iteration.ballY 
+        x: clamp(iteration.ballX), 
+        y: clamp(iteration.ballY)
       })
     }
 
@@ -110,24 +121,24 @@ function App() {
       const animFrame = iterationIndex % 14
       const pose = animFrame > 6 ? 13 - animFrame : animFrame
       
-      // Add home team players
+      // Add home team players (clamped to field bounds)
       for (let i = 0; i < iteration.homePlayerX.length; i++) {
         updatedPlayers.push({
           number: i + 1,
-          x: iteration.homePlayerX[i],
-          y: iteration.homePlayerY[i],
+          x: clamp(iteration.homePlayerX[i]),
+          y: clamp(iteration.homePlayerY[i]),
           team: 'home',
           iter: animFrame,
           pose: pose
         })
       }
       
-      // Add away team players
+      // Add away team players (clamped to field bounds)
       for (let i = 0; i < iteration.awayPlayerX.length; i++) {
         updatedPlayers.push({
           number: i + 1,
-          x: iteration.awayPlayerX[i],
-          y: iteration.awayPlayerY[i],
+          x: clamp(iteration.awayPlayerX[i]),
+          y: clamp(iteration.awayPlayerY[i]),
           team: 'away',
           iter: animFrame,
           pose: pose
@@ -216,6 +227,8 @@ function App() {
     setBall({ x: 0.5, y: 0.5 })
     setCurrentIteration(0)
     setIsPlaying(false)
+    setCurrentHomeGoals(0)
+    setCurrentAwayGoals(0)
   }
 
   return (
@@ -285,13 +298,21 @@ function App() {
           
           {matchResult && (
             <div className="match-status">
-              <h3>Match Result</h3>
-              <p className="team-info">🔴 {matchResult.homeTeam?.teamName || homeTacticName}: {matchResult.finalHomeGoals} goals</p>
-              <p className="team-info">🔵 {matchResult.awayTeam?.teamName || awayTacticName}: {matchResult.finalAwayGoals} goals</p>
-              <p className="possession-info">
-                Possession: {matchResult.homeTeam?.teamName || homeTacticName} {(matchResult.finalHomePossession * 100).toFixed(1)}% - {matchResult.awayTeam?.teamName || awayTacticName} {((1 - matchResult.finalHomePossession) * 100).toFixed(1)}%
-              </p>
-              <p className="iterations-info">Total Iterations: {matchResult.iterations?.length || 0}</p>
+              <h3>Match Status</h3>
+              <div className="current-score">
+                <h4>Current Score (Iteration {currentIteration + 1})</h4>
+                <p className="team-info score-large">🔴 {matchResult.homeTeam?.teamName || homeTacticName}: {currentHomeGoals}</p>
+                <p className="team-info score-large">🔵 {matchResult.awayTeam?.teamName || awayTacticName}: {currentAwayGoals}</p>
+              </div>
+              <div className="final-result">
+                <h4>Final Result</h4>
+                <p className="team-info">🔴 {matchResult.homeTeam?.teamName || homeTacticName}: {matchResult.finalHomeGoals} goals</p>
+                <p className="team-info">🔵 {matchResult.awayTeam?.teamName || awayTacticName}: {matchResult.finalAwayGoals} goals</p>
+                <p className="possession-info">
+                  Possession: {matchResult.homeTeam?.teamName || homeTacticName} {(matchResult.finalHomePossession * 100).toFixed(1)}% - {matchResult.awayTeam?.teamName || awayTacticName} {((1 - matchResult.finalHomePossession) * 100).toFixed(1)}%
+                </p>
+                <p className="iterations-info">Total Iterations: {matchResult.iterations?.length || 0}</p>
+              </div>
               
               {/* Playback Controls */}
               <div className="playback-controls">
