@@ -100,14 +100,29 @@ function App() {
       setCurrentAwayGoals(iteration.awayGoals)
     }
     
-    // Helper function to clamp values between 0 and 1
-    const clamp = (value) => Math.max(0, Math.min(1, value))
+    // Backend coordinate system (in meters, centered at origin):
+    // Playing field:
+    //   X: -52.5 to +52.5 (105m total, FIELD_LENGTH)
+    //   Y: -34 to +34 (68m total, FIELD_WIDTH)
+    // Total grass area (including margins):
+    //   X: -56.5 to +56.5 (113m total, TOTAL_LENGTH)
+    //   Y: -36.5 to +36.5 (73m total, TOTAL_WIDTH)
+    //
+    // Frontend coordinate system (normalized 0-1):
+    // x: 0-1 (left to right, maps to backend Y / WIDTH)
+    // y: 0-1 (top to bottom, maps to backend X / LENGTH)
+    //
+    // The canvas/field image shows the total grass area, so we normalize against TOTAL dimensions:
+    // frontend_x = (backend_y + 36.5) / 73
+    // frontend_y = (backend_x + 56.5) / 113
+    const normalizeX = (backendY) => (backendY + 36.5) / 73
+    const normalizeY = (backendX) => (backendX + 56.5) / 113
     
-    // Update ball position from ballX and ballY (clamped to field bounds)
+    // Update ball position from ballX and ballY
     if (iteration.ballX !== undefined && iteration.ballY !== undefined) {
       setBall({ 
-        x: clamp(iteration.ballX), 
-        y: clamp(iteration.ballY)
+        x: normalizeX(iteration.ballY), // backend Y → frontend x
+        y: normalizeY(iteration.ballX)  // backend X → frontend y
       })
     }
 
@@ -121,24 +136,24 @@ function App() {
       const animFrame = iterationIndex % 14
       const pose = animFrame > 6 ? 13 - animFrame : animFrame
       
-      // Add home team players (clamped to field bounds)
+      // Add home team players
       for (let i = 0; i < iteration.homePlayerX.length; i++) {
         updatedPlayers.push({
           number: i + 1,
-          x: clamp(iteration.homePlayerX[i]),
-          y: clamp(iteration.homePlayerY[i]),
+          x: normalizeX(iteration.homePlayerY[i]), // backend Y → frontend x
+          y: normalizeY(iteration.homePlayerX[i]), // backend X → frontend y
           team: 'home',
           iter: animFrame,
           pose: pose
         })
       }
       
-      // Add away team players (clamped to field bounds)
+      // Add away team players
       for (let i = 0; i < iteration.awayPlayerX.length; i++) {
         updatedPlayers.push({
           number: i + 1,
-          x: clamp(iteration.awayPlayerX[i]),
-          y: clamp(iteration.awayPlayerY[i]),
+          x: normalizeX(iteration.awayPlayerY[i]), // backend Y → frontend x
+          y: normalizeY(iteration.awayPlayerX[i]), // backend X → frontend y
           team: 'away',
           iter: animFrame,
           pose: pose
