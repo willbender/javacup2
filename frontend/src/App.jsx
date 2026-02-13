@@ -50,6 +50,8 @@ function App() {
   const [backendAvailable, setBackendAvailable] = useState(true)
   const [matchResult, setMatchResult] = useState(null)
   const [error, setError] = useState(null)
+  const [currentIteration, setCurrentIteration] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   // Fetch tactics from backend on component mount
   useEffect(() => {
@@ -84,74 +86,104 @@ function App() {
   // Initialize sound system
   const { toggleSounds } = useMatchSounds(matchStarted)
 
-  // Simple animation when match is running - use actual match data if available
+  // Helper function to update display for a specific iteration
+  const updateIterationDisplay = (iterationIndex) => {
+    if (!matchResult?.iterations || iterationIndex >= matchResult.iterations.length) return
+
+    const iteration = matchResult.iterations[iterationIndex]
+    
+    // Update ball position from ballX and ballY
+    if (iteration.ballX !== undefined && iteration.ballY !== undefined) {
+      setBall({ 
+        x: iteration.ballX, 
+        y: iteration.ballY 
+      })
+    }
+
+    // Update player positions from separate arrays
+    if (iteration.homePlayerX && iteration.homePlayerY && 
+        iteration.awayPlayerX && iteration.awayPlayerY) {
+      
+      const updatedPlayers = []
+      
+      // Calculate animation frame
+      const animFrame = iterationIndex % 14
+      const pose = animFrame > 6 ? 13 - animFrame : animFrame
+      
+      // Add home team players
+      for (let i = 0; i < iteration.homePlayerX.length; i++) {
+        updatedPlayers.push({
+          number: i + 1,
+          x: iteration.homePlayerX[i],
+          y: iteration.homePlayerY[i],
+          team: 'home',
+          iter: animFrame,
+          pose: pose
+        })
+      }
+      
+      // Add away team players
+      for (let i = 0; i < iteration.awayPlayerX.length; i++) {
+        updatedPlayers.push({
+          number: i + 1,
+          x: iteration.awayPlayerX[i],
+          y: iteration.awayPlayerY[i],
+          team: 'away',
+          iter: animFrame,
+          pose: pose
+        })
+      }
+      
+      setPlayers(updatedPlayers)
+    }
+  }
+
+  // Auto-play animation when playing
+  useEffect(() => {
+    if (!isPlaying || !matchResult?.iterations) return
+
+    const interval = setInterval(() => {
+      setCurrentIteration(prev => {
+        const next = prev + 1
+        if (next >= matchResult.iterations.length) {
+          setIsPlaying(false)
+          return matchResult.iterations.length - 1
+        }
+        return next
+      })
+    }, 50) // Update every 50ms for smoother animation
+
+    return () => clearInterval(interval)
+  }, [isPlaying, matchResult])
+
+  // Update display when currentIteration changes
   useEffect(() => {
     if (!matchStarted || !matchResult) return
 
-    // If we have match result data, animate through the iterations
-    if (matchResult.iterationsJson && matchResult.iterationsJson.length > 0) {
-      let currentIteration = 0
-      const totalIterations = matchResult.iterationsJson.length
+    console.log('Animation effect triggered:', {
+      matchStarted,
+      hasIterations: !!matchResult.iterations,
+      iterationCount: matchResult.iterations?.length || 0,
+      currentIteration
+    })
 
-      const interval = setInterval(() => {
-        if (currentIteration >= totalIterations) {
-          clearInterval(interval)
-          return
-        }
+    // If we have match result data, update the display
+    if (matchResult.iterations && matchResult.iterations.length > 0) {
+      console.log(`Displaying iteration ${currentIteration} of ${matchResult.iterations.length}`)
+      
+      // Log first iteration structure for debugging (only once)
+      if (currentIteration === 0 && matchResult.iterations[0]) {
+        console.log('First iteration sample:', {
+          ballX: matchResult.iterations[0].ballX,
+          ballY: matchResult.iterations[0].ballY,
+          homePlayerXCount: matchResult.iterations[0].homePlayerX?.length || 0,
+          awayPlayerXCount: matchResult.iterations[0].awayPlayerX?.length || 0
+        })
+      }
 
-        const iteration = matchResult.iterationsJson[currentIteration]
-        
-        // Update ball position from ballX and ballY
-        if (iteration.ballX !== undefined && iteration.ballY !== undefined) {
-          setBall({ 
-            x: iteration.ballX, 
-            y: iteration.ballY 
-          })
-        }
-
-        // Update player positions from separate arrays
-        if (iteration.homePlayerX && iteration.homePlayerY && 
-            iteration.awayPlayerX && iteration.awayPlayerY) {
-          
-          const updatedPlayers = []
-          
-          // Calculate animation frame once
-          const animFrame = currentIteration % 14
-          const pose = animFrame > 6 ? 13 - animFrame : animFrame
-          
-          // Add home team players
-          for (let i = 0; i < iteration.homePlayerX.length; i++) {
-            updatedPlayers.push({
-              number: i + 1,
-              x: iteration.homePlayerX[i],
-              y: iteration.homePlayerY[i],
-              team: 'home',
-              iter: animFrame,
-              pose: pose
-            })
-          }
-          
-          // Add away team players
-          for (let i = 0; i < iteration.awayPlayerX.length; i++) {
-            updatedPlayers.push({
-              number: i + 1,
-              x: iteration.awayPlayerX[i],
-              y: iteration.awayPlayerY[i],
-              team: 'away',
-              iter: animFrame,
-              pose: pose
-            })
-          }
-          
-          setPlayers(updatedPlayers)
-        }
-
-        currentIteration++
-      }, 50) // Update every 50ms for smoother animation
-
-      return () => clearInterval(interval)
+      updateIterationDisplay(currentIteration)
     }
-  }, [matchStarted, matchResult])
+  }, [currentIteration, matchStarted, matchResult])
 
   const handleToggleSounds = () => {
     const newState = toggleSounds()
@@ -179,12 +211,14 @@ function App() {
       // Store the match result
       setMatchResult(result)
       setMatchStarted(true)
+      setCurrentIteration(0)
+      setIsPlaying(true) // Auto-start playback
       
       console.log('Match completed:', {
         homeTeam: result.homeTeam?.teamName,
         awayTeam: result.awayTeam?.teamName,
         score: `${result.finalHomeGoals} - ${result.finalAwayGoals}`,
-        iterations: result.totalIterations
+        iterations: result.iterations?.length || 0
       })
     } catch (err) {
       console.error('Failed to run match:', err)
@@ -199,6 +233,8 @@ function App() {
     setMatchResult(null)
     setPlayers(getInitialPlayers())
     setBall({ x: 0.5, y: 0.5 })
+    setCurrentIteration(0)
+    setIsPlaying(false)
   }
 
   return (
@@ -274,7 +310,52 @@ function App() {
               <p className="possession-info">
                 Possession: {matchResult.homeTeam?.teamName || homeTacticName} {(matchResult.finalHomePossession * 100).toFixed(1)}% - {matchResult.awayTeam?.teamName || awayTacticName} {((1 - matchResult.finalHomePossession) * 100).toFixed(1)}%
               </p>
-              <p className="iterations-info">Total Iterations: {matchResult.totalIterations}</p>
+              <p className="iterations-info">Total Iterations: {matchResult.iterations?.length || 0}</p>
+              
+              {/* Playback Controls */}
+              <div className="playback-controls">
+                <h4>Match Playback</h4>
+                <div className="playback-buttons">
+                  <button 
+                    onClick={() => setCurrentIteration(0)}
+                    title="Go to start"
+                    className="playback-btn"
+                  >
+                    ⏮️ Start
+                  </button>
+                  <button 
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    title={isPlaying ? "Pause" : "Play"}
+                    className="playback-btn"
+                  >
+                    {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+                  </button>
+                  <button 
+                    onClick={() => setCurrentIteration(matchResult.iterations.length - 1)}
+                    title="Go to end"
+                    className="playback-btn"
+                  >
+                    ⏭️ End
+                  </button>
+                </div>
+                <div className="playback-slider">
+                  <label htmlFor="iteration-slider">
+                    Iteration: {currentIteration + 1} / {matchResult.iterations?.length || 0}
+                  </label>
+                  <input
+                    id="iteration-slider"
+                    type="range"
+                    min="0"
+                    max={Math.max(0, (matchResult.iterations?.length || 1) - 1)}
+                    value={currentIteration}
+                    onChange={(e) => {
+                      setIsPlaying(false)
+                      setCurrentIteration(parseInt(e.target.value))
+                    }}
+                    className="slider"
+                  />
+                </div>
+              </div>
             </div>
           )}
           
