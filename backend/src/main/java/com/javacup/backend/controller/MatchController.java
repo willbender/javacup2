@@ -46,11 +46,11 @@ public class MatchController {
             // Validate both tactics exist
             List<String> missingTactics = new ArrayList<>();
             
-            if (!tacticService.tacticExists(request.getHomeTacticName())) {
+            if (!tacticService.getAllTactics().contains(request.getHomeTacticName())) {
                 missingTactics.add(request.getHomeTacticName());
             }
             
-            if (!tacticService.tacticExists(request.getAwayTacticName())) {
+            if (!tacticService.getAllTactics().contains(request.getAwayTacticName())) {
                 missingTactics.add(request.getAwayTacticName());
             }
             
@@ -61,7 +61,7 @@ public class MatchController {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("error", message);
                 errorResponse.put("missingTactics", missingTactics);
-                errorResponse.put("availableTactics", tacticService.getAvailableTactics());
+                errorResponse.put("availableTactics", tacticService.getAllTactics());
                 
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }
@@ -96,7 +96,7 @@ public class MatchController {
             
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
-            errorResponse.put("availableTactics", tacticService.getAvailableTactics());
+            errorResponse.put("availableTactics", tacticService.getAllTactics());
             
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             

@@ -30,15 +30,15 @@ class MatchControllerTest {
     @Test
     void testRunMatchSuccess() throws Exception {
         // Use actual tactics registered in TacticService
-        MatchRequest request = new MatchRequest("SimpleTactic", "DefaultHome");
+        MatchRequest request = new MatchRequest("twentythree", "pistachos");
         
         // Execute and verify - SavedMatch structure
         mockMvc.perform(post("/api/match/run")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.homeTeam.teamName").value("SimpleTactic"))
-                .andExpect(jsonPath("$.awayTeam.teamName").value("DefaultHome"))
+                .andExpect(jsonPath("$.homeTeam.teamName").value("TwentyThree FC"))
+                .andExpect(jsonPath("$.awayTeam.teamName").value("Los Pistachos"))
                 .andExpect(jsonPath("$.finalHomeGoals").isNumber())
                 .andExpect(jsonPath("$.finalAwayGoals").isNumber())
                 .andExpect(jsonPath("$.finalHomePossession").isNumber())
@@ -98,7 +98,7 @@ class MatchControllerTest {
         mockMvc.perform(get("/api/match/tactics"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tactics").isArray())
-                .andExpect(jsonPath("$.tactics", hasSize(3)))
-                .andExpect(jsonPath("$.count").value(3));
+                .andExpect(jsonPath("$.tactics", hasSize(4)))
+                .andExpect(jsonPath("$.count").value(4));
     }
 }
