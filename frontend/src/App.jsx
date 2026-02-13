@@ -101,18 +101,17 @@ function App() {
 
         const iteration = matchResult.iterationsJson[currentIteration]
         
-        // Update ball position
-        if (iteration.visibleBallPosition) {
+        // Update ball position from ballX and ballY
+        if (iteration.ballX !== undefined && iteration.ballY !== undefined) {
           setBall({ 
-            x: iteration.visibleBallPosition.x, 
-            y: iteration.visibleBallPosition.y 
+            x: iteration.ballX, 
+            y: iteration.ballY 
           })
         }
 
-        // Update player positions
-        if (iteration.positions && iteration.positions.length === 2) {
-          const homePositions = iteration.positions[0]
-          const awayPositions = iteration.positions[1]
+        // Update player positions from separate arrays
+        if (iteration.homePlayerX && iteration.homePlayerY && 
+            iteration.awayPlayerX && iteration.awayPlayerY) {
           
           const updatedPlayers = []
           
@@ -121,28 +120,28 @@ function App() {
           const pose = animFrame > 6 ? 13 - animFrame : animFrame
           
           // Add home team players
-          homePositions.forEach((pos, index) => {
+          for (let i = 0; i < iteration.homePlayerX.length; i++) {
             updatedPlayers.push({
-              number: index + 1,
-              x: pos.x,
-              y: pos.y,
+              number: i + 1,
+              x: iteration.homePlayerX[i],
+              y: iteration.homePlayerY[i],
               team: 'home',
               iter: animFrame,
               pose: pose
             })
-          })
+          }
           
           // Add away team players
-          awayPositions.forEach((pos, index) => {
+          for (let i = 0; i < iteration.awayPlayerX.length; i++) {
             updatedPlayers.push({
-              number: index + 1,
-              x: pos.x,
-              y: pos.y,
+              number: i + 1,
+              x: iteration.awayPlayerX[i],
+              y: iteration.awayPlayerY[i],
               team: 'away',
               iter: animFrame,
               pose: pose
             })
-          })
+          }
           
           setPlayers(updatedPlayers)
         }
