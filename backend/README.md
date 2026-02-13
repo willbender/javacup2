@@ -17,7 +17,7 @@ The backend follows a layered architecture pattern with clear separation of conc
 - **Location**: `src/main/java/com/javacup/backend/service/`
 - **Purpose**: Contains business logic and orchestrates data flow between controllers and repositories
 - **Current Services**:
-  - `TacticService`: Manages tactics information and provides list of available tactics
+  - `TacticService`: Dynamically discovers and manages tactics information from the `com.javacup.tactics` package
 
 ### 3. **Repository Layer** (Future)
 - **Location**: `src/main/java/com/javacup/backend/repository/`
@@ -170,38 +170,21 @@ The application will start on port 8080 by default.
 
 ### List Tactics
 - **URL**: `GET /api/tactics`
-- **Description**: Returns a list of all available tactics (team AI strategies) that can be selected for a match. No authentication required.
+- **Description**: Returns a list of all available tactics (team AI strategies) that can be selected for a match. The list is dynamically discovered by scanning the `com.javacup.tactics` package for implementations of the `Tactic` interface. Each subdirectory under the tactics package represents a unique tactic. No authentication required.
 - **Response**:
   ```json
   {
     "tactics": [
-      "Ciclones",
-      "JGTeam",
-      "Ander",
-      "Cucaracha",
-      "DyMCupcakes",
-      "Elaga",
-      "Enavas",
-      "Espinete",
-      "FelipeMoraTeam",
-      "Frioleros",
-      "Jhontona",
-      "Kpacha",
-      "Masia13",
-      "Novena",
-      "Pistachos",
-      "Romedal",
-      "SitiosTactic2",
-      "TheShadows",
-      "Toulousains",
-      "TwentyThree",
-      "Txami",
-      "Valedores",
-      "AdamTeam"
+      "masia13",
+      "pistachos",
+      "romedal",
+      "twentythree"
     ],
-    "count": 23
+    "count": 4
   }
   ```
+  
+  **Note**: The tactics list is dynamically generated. As new tactics are added to the `com.javacup.tactics` package, they will automatically appear in the response.
 
 ## Configuration
 
