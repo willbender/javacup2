@@ -82,7 +82,7 @@ function App() {
   }, [])
 
   // Initialize sound system
-  const { playKickSound, toggleSounds } = useMatchSounds(matchStarted)
+  const { toggleSounds } = useMatchSounds(matchStarted)
 
   // Simple animation when match is running - use actual match data if available
   useEffect(() => {

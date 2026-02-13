@@ -20,14 +20,52 @@ frontend/
 ├── public/           # Static assets
 ├── src/
 │   ├── assets/      # Images, fonts, and other assets
+│   ├── components/  # React components
+│   ├── services/    # API services for backend integration
+│   ├── utils/       # Utility functions
 │   ├── App.jsx      # Main application component
 │   ├── App.css      # Application styles
 │   ├── main.jsx     # Application entry point
 │   └── index.css    # Global styles
+├── .env             # Environment variables (not committed)
+├── .env.example     # Example environment configuration
 ├── index.html       # HTML entry point
 ├── package.json     # Dependencies and scripts
 └── vite.config.js   # Vite configuration
 ```
+
+## Backend Configuration
+
+The frontend communicates with the JavaCup backend API. You can configure the backend URL using environment variables.
+
+### Setting up the Backend URL
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and set the backend URL:
+   ```
+   VITE_API_BASE_URL=http://localhost:8080
+   ```
+
+3. If deploying to production, set the environment variable to your backend server URL:
+   ```
+   VITE_API_BASE_URL=https://your-backend-server.com
+   ```
+
+**Note:** The `.env` file is not committed to git. Always use `.env.example` as a template.
+
+### Backend API Integration
+
+The frontend integrates with the following backend endpoints:
+
+- **GET /api/tactics** - Fetches available tactics for team selection
+- **POST /api/match/run** - Runs a match between two tactics and returns the result
+- **GET /api/health** - Health check to verify backend availability
+
+All API calls are handled through the `src/services/api.js` module.
 
 ## Getting Started
 
