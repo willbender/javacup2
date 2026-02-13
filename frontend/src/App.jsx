@@ -55,7 +55,7 @@ function App() {
   const [soundEnabled, setSoundEnabled] = useState(true)
 
   // Initialize sound system
-  const { playKickSound, toggleSounds, isSoundEnabled } = useMatchSounds(matchStarted)
+  const { playKickSound, toggleSounds } = useMatchSounds(matchStarted)
 
   // Simple animation when match is running
   useEffect(() => {

@@ -86,7 +86,7 @@ export class SoundManager {
       try {
         sound.pause()
         sound.currentTime = 0
-      } catch (error) {
+      } catch {
         // Ignore errors when stopping
       }
     })
