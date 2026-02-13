@@ -101,28 +101,29 @@ function App() {
     }
     
     // Backend coordinate system (in meters, centered at origin):
-    // Playing field:
-    //   X: -52.5 to +52.5 (105m total, FIELD_LENGTH)
-    //   Y: -34 to +34 (68m total, FIELD_WIDTH)
+    // IMPORTANT: The Position class comment has X and Y backwards!
+    // Actual usage in Constants.java shows:
+    //   X: -34 to +34 (68m total, FIELD_WIDTH) - left to right
+    //   Y: -52.5 to +52.5 (105m total, FIELD_LENGTH) - goal to goal
     // Total grass area (including margins):
-    //   X: -56.5 to +56.5 (113m total, TOTAL_LENGTH)
-    //   Y: -36.5 to +36.5 (73m total, TOTAL_WIDTH)
+    //   X: -36.5 to +36.5 (73m total, TOTAL_WIDTH)
+    //   Y: -56.5 to +56.5 (113m total, TOTAL_LENGTH)
     //
     // Frontend coordinate system (normalized 0-1):
-    // x: 0-1 (left to right, maps to backend Y / WIDTH)
-    // y: 0-1 (top to bottom, maps to backend X / LENGTH)
+    // x: 0-1 (left to right, width direction)
+    // y: 0-1 (top to bottom, length direction, goals at top y≈0.1 and bottom y≈0.9)
     //
-    // The canvas/field image shows the total grass area, so we normalize against TOTAL dimensions:
-    // frontend_x = (backend_y + 36.5) / 73
-    // frontend_y = (backend_x + 56.5) / 113
-    const normalizeX = (backendY) => (backendY + 36.5) / 73
-    const normalizeY = (backendX) => (backendX + 56.5) / 113
+    // Transformation (NO axis swap needed):
+    // frontend_x = (backend_x + 36.5) / 73   // width to width
+    // frontend_y = (backend_y + 56.5) / 113  // length to length
+    const normalizeX = (backendX) => (backendX + 36.5) / 73
+    const normalizeY = (backendY) => (backendY + 56.5) / 113
     
     // Update ball position from ballX and ballY
     if (iteration.ballX !== undefined && iteration.ballY !== undefined) {
       setBall({ 
-        x: normalizeX(iteration.ballY), // backend Y → frontend x
-        y: normalizeY(iteration.ballX)  // backend X → frontend y
+        x: normalizeX(iteration.ballX), // backend X → frontend x (width)
+        y: normalizeY(iteration.ballY)  // backend Y → frontend y (length)
       })
     }
 
@@ -140,8 +141,8 @@ function App() {
       for (let i = 0; i < iteration.homePlayerX.length; i++) {
         updatedPlayers.push({
           number: i + 1,
-          x: normalizeX(iteration.homePlayerY[i]), // backend Y → frontend x
-          y: normalizeY(iteration.homePlayerX[i]), // backend X → frontend y
+          x: normalizeX(iteration.homePlayerX[i]), // backend X → frontend x (width)
+          y: normalizeY(iteration.homePlayerY[i]), // backend Y → frontend y (length)
           team: 'home',
           iter: animFrame,
           pose: pose
@@ -152,8 +153,8 @@ function App() {
       for (let i = 0; i < iteration.awayPlayerX.length; i++) {
         updatedPlayers.push({
           number: i + 1,
-          x: normalizeX(iteration.awayPlayerY[i]), // backend Y → frontend x
-          y: normalizeY(iteration.awayPlayerX[i]), // backend X → frontend y
+          x: normalizeX(iteration.awayPlayerX[i]), // backend X → frontend x (width)
+          y: normalizeY(iteration.awayPlayerY[i]), // backend Y → frontend y (length)
           team: 'away',
           iter: animFrame,
           pose: pose
