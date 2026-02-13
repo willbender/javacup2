@@ -119,19 +119,22 @@ function App() {
     const normalizeX = (backendX) => (backendX + 36.5) / 73
     const normalizeY = (backendY) => (backendY + 56.5) / 113
     
-    // Debug logging for first few iterations
-    if (iterationIndex < 5 || iterationIndex % 500 === 0) {
-      console.log(`Iteration ${iterationIndex}:`)
-      console.log(`  Ball backend: X=${iteration.ballX}, Y=${iteration.ballY}`)
-      console.log(`  Ball frontend: x=${normalizeX(iteration.ballX).toFixed(3)}, y=${normalizeY(iteration.ballY).toFixed(3)}`)
-      if (iteration.homePlayerX && iteration.homePlayerX[0] !== undefined) {
-        console.log(`  Home Player 0 backend: X=${iteration.homePlayerX[0]}, Y=${iteration.homePlayerY[0]}`)
-        console.log(`  Home Player 0 frontend: x=${normalizeX(iteration.homePlayerX[0]).toFixed(3)}, y=${normalizeY(iteration.homePlayerY[0]).toFixed(3)}`)
+    // Debug logging for first few iterations - expanded to show all players
+    if (iterationIndex === 0 || iterationIndex === 1000) {
+      console.log(`\n=== Iteration ${iterationIndex} - Full Debug ===`)
+      console.log(`Ball backend: X=${iteration.ballX}, Y=${iteration.ballY}`)
+      console.log(`Ball frontend: x=${normalizeX(iteration.ballX).toFixed(3)}, y=${normalizeY(iteration.ballY).toFixed(3)}`)
+      
+      console.log('\nHome Team Players:')
+      for (let i = 0; i < Math.min(11, iteration.homePlayerX?.length || 0); i++) {
+        console.log(`  Player ${i}: backend X=${iteration.homePlayerX[i].toFixed(2)}, Y=${iteration.homePlayerY[i].toFixed(2)} → frontend x=${normalizeX(iteration.homePlayerX[i]).toFixed(3)}, y=${normalizeY(iteration.homePlayerY[i]).toFixed(3)}`)
       }
-      if (iteration.awayPlayerX && iteration.awayPlayerX[0] !== undefined) {
-        console.log(`  Away Player 0 backend: X=${iteration.awayPlayerX[0]}, Y=${iteration.awayPlayerY[0]}`)
-        console.log(`  Away Player 0 frontend: x=${normalizeX(iteration.awayPlayerX[0]).toFixed(3)}, y=${normalizeY(iteration.awayPlayerY[0]).toFixed(3)}`)
+      
+      console.log('\nAway Team Players:')
+      for (let i = 0; i < Math.min(11, iteration.awayPlayerX?.length || 0); i++) {
+        console.log(`  Player ${i}: backend X=${iteration.awayPlayerX[i].toFixed(2)}, Y=${iteration.awayPlayerY[i].toFixed(2)} → frontend x=${normalizeX(iteration.awayPlayerX[i]).toFixed(3)}, y=${normalizeY(iteration.awayPlayerY[i]).toFixed(3)}`)
       }
+      console.log('================\n')
     }
     
     // Update ball position from ballX and ballY
