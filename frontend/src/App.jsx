@@ -160,27 +160,8 @@ function App() {
   useEffect(() => {
     if (!matchStarted || !matchResult) return
 
-    console.log('Animation effect triggered:', {
-      matchStarted,
-      hasIterations: !!matchResult.iterations,
-      iterationCount: matchResult.iterations?.length || 0,
-      currentIteration
-    })
-
     // If we have match result data, update the display
     if (matchResult.iterations && matchResult.iterations.length > 0) {
-      console.log(`Displaying iteration ${currentIteration} of ${matchResult.iterations.length}`)
-      
-      // Log first iteration structure for debugging (only once)
-      if (currentIteration === 0 && matchResult.iterations[0]) {
-        console.log('First iteration sample:', {
-          ballX: matchResult.iterations[0].ballX,
-          ballY: matchResult.iterations[0].ballY,
-          homePlayerXCount: matchResult.iterations[0].homePlayerX?.length || 0,
-          awayPlayerXCount: matchResult.iterations[0].awayPlayerX?.length || 0
-        })
-      }
-
       updateIterationDisplay(currentIteration)
     }
   }, [currentIteration, matchStarted, matchResult])
