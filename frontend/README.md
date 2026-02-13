@@ -78,6 +78,67 @@ Run ESLint to check code quality:
 npm run lint
 ```
 
+### Using Docker
+
+Build the Docker image:
+
+```bash
+docker build -t javacup-frontend .
+```
+
+Run the container:
+
+```bash
+docker run -p 3000:80 javacup-frontend
+```
+
+The application will be available at `http://localhost:3000`
+
+## Docker Support
+
+The frontend includes a multi-stage Dockerfile optimized for production:
+
+- **Stage 1 (Builder)**: Uses `node:22-alpine` to build the application
+  - Installs dependencies with `npm ci` for reproducible builds
+  - Builds the production bundle with Vite
+  
+- **Stage 2 (Runtime)**: Uses `nginx:1.27-alpine` to serve static files
+  - Minimal image size (~50MB)
+  - Production-ready nginx configuration
+  - Includes health check support
+  - Exposes port 80
+
+### Docker Commands
+
+Build the image:
+```bash
+docker build -t javacup-frontend .
+```
+
+Run the container:
+```bash
+docker run -d -p 3000:80 --name javacup-frontend javacup-frontend
+```
+
+View logs:
+```bash
+docker logs -f javacup-frontend
+```
+
+Stop the container:
+```bash
+docker stop javacup-frontend
+```
+
+Remove the container:
+```bash
+docker rm javacup-frontend
+```
+
+### Using with Docker Compose
+
+See the root README.md for information about running the entire stack (backend + frontend) with Docker Compose.
+
 ## How to Make Changes
 
 ### Adding New Components

@@ -142,7 +142,65 @@ mvn clean package
 java -jar target/backend-2.0.0.jar
 ```
 
+### Using Docker
+
+Build the Docker image:
+
+```bash
+docker build -t javacup-backend .
+```
+
+Run the container:
+
+```bash
+docker run -p 8080:8080 javacup-backend
+```
+
 The application will start on port 8080 by default.
+
+## Docker Support
+
+The backend includes a multi-stage Dockerfile optimized for production:
+
+- **Stage 1 (Builder)**: Uses `maven:3.9-eclipse-temurin-21` to build the application
+  - Leverages Docker layer caching for dependencies
+  - Compiles and packages the application
+  
+- **Stage 2 (Runtime)**: Uses `eclipse-temurin:21-jre-jammy` for a smaller runtime image
+  - Only includes the JAR file and JRE (no build tools)
+  - Includes health check support
+  - Exposes port 8080
+
+### Docker Commands
+
+Build the image:
+```bash
+docker build -t javacup-backend .
+```
+
+Run the container:
+```bash
+docker run -d -p 8080:8080 --name javacup-backend javacup-backend
+```
+
+View logs:
+```bash
+docker logs -f javacup-backend
+```
+
+Stop the container:
+```bash
+docker stop javacup-backend
+```
+
+Remove the container:
+```bash
+docker rm javacup-backend
+```
+
+### Using with Docker Compose
+
+See the root README.md for information about running the entire stack (backend + frontend) with Docker Compose.
 
 ## API Endpoints
 
