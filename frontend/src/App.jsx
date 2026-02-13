@@ -116,6 +116,10 @@ function App() {
           
           const updatedPlayers = []
           
+          // Calculate animation frame once
+          const animFrame = currentIteration % 14
+          const pose = animFrame > 6 ? 13 - animFrame : animFrame
+          
           // Add home team players
           homePositions.forEach((pos, index) => {
             updatedPlayers.push({
@@ -123,8 +127,8 @@ function App() {
               x: pos.x,
               y: pos.y,
               team: 'home',
-              iter: currentIteration % 14,
-              pose: (currentIteration % 14) > 6 ? 13 - (currentIteration % 14) : (currentIteration % 14)
+              iter: animFrame,
+              pose: pose
             })
           })
           
@@ -135,8 +139,8 @@ function App() {
               x: pos.x,
               y: pos.y,
               team: 'away',
-              iter: currentIteration % 14,
-              pose: (currentIteration % 14) > 6 ? 13 - (currentIteration % 14) : (currentIteration % 14)
+              iter: animFrame,
+              pose: pose
             })
           })
           
@@ -269,8 +273,7 @@ function App() {
               <p className="team-info">🔴 {matchResult.homeTeam?.teamName || homeTacticName}: {matchResult.finalHomeGoals} goals</p>
               <p className="team-info">🔵 {matchResult.awayTeam?.teamName || awayTacticName}: {matchResult.finalAwayGoals} goals</p>
               <p className="possession-info">
-                Possession: {matchResult.homeTeam?.teamName || homeTacticName} {(matchResult.finalHomePossession * 100).toFixed(1)}% - 
-                {matchResult.awayTeam?.teamName || awayTacticName} {((1 - matchResult.finalHomePossession) * 100).toFixed(1)}%
+                Possession: {matchResult.homeTeam?.teamName || homeTacticName} {(matchResult.finalHomePossession * 100).toFixed(1)}% - {matchResult.awayTeam?.teamName || awayTacticName} {((1 - matchResult.finalHomePossession) * 100).toFixed(1)}%
               </p>
               <p className="iterations-info">Total Iterations: {matchResult.totalIterations}</p>
             </div>
