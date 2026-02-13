@@ -17,8 +17,14 @@
   border-radius: 4px;
   font-size: 14px;
   background-color: #fff;
+  color: #333;
   cursor: pointer;
   transition: border-color 0.2s;
+}
+
+.tactic-dropdown option {
+  background-color: #fff;
+  color: #333;
 }
 
 .tactic-dropdown:hover {

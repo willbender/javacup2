@@ -1,100 +1,93 @@
 package com.javacup.backend.service;
 
 import com.javacup.model.Tactic;
-import com.javacup.model.engine.SimpleTactic;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Service;
 
-import java.awt.Color;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Service for managing and loading tactics by name.
+ * Service for managing tactics information.
+ * <p>
+ * This service dynamically discovers available tactics by scanning the
+ * com.javacup.tactics package for classes that implement the Tactic interface.
+ * Each subdirectory in the tactics package represents a unique team AI implementation.
+ * </p>
  * 
  * @author JavaCup Team
  * @since 2.0.0
  */
 @Service
-@Slf4j
 public class TacticService {
 
-    private final Map<String, TacticFactory> tactics = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(TacticService.class);
+    private static final String TACTICS_PACKAGE = "com.javacup.tactics";
+    
+    private final List<String> availableTactics;
 
     /**
-     * Constructor that registers available tactics.
+     * Constructor that initializes the service by discovering all available tactics.
+     * Scans the classpath for classes implementing the Tactic interface under
+     * the com.javacup.tactics package.
      */
     public TacticService() {
-        // Register example tactics
-        registerTactic("SimpleTactic", () -> new SimpleTactic("SimpleTactic", Color.BLUE, Color.WHITE));
-        registerTactic("DefaultHome", () -> new SimpleTactic("DefaultHome", Color.BLUE, Color.WHITE));
-        registerTactic("DefaultAway", () -> new SimpleTactic("DefaultAway", Color.RED, Color.YELLOW));
-        
-        log.info("TacticService initialized with {} tactics", tactics.size());
+        this.availableTactics = discoverTactics();
+        logger.info("Discovered {} tactics: {}", availableTactics.size(), availableTactics);
     }
 
     /**
-     * Loads a tactic by name.
-     *
-     * @param name the name of the tactic
-     * @return the tactic instance
-     * @throws TacticNotFoundException if the tactic doesn't exist
+     * Discovers all available tactics by scanning the tactics package.
+     * Each tactic is identified by its package name (subdirectory name).
+     * 
+     * @return list of discovered tactic package names
      */
-    public Tactic loadTactic(String name) {
-        log.debug("Loading tactic: {}", name);
+    private List<String> discoverTactics() {
+        List<String> tactics = new ArrayList<>();
         
-        TacticFactory factory = tactics.get(name);
-        if (factory == null) {
-            log.warn("Tactic not found: {}", name);
-            throw new TacticNotFoundException("Tactic not found: " + name);
+        try {
+            ClassPathScanningCandidateComponentProvider scanner = 
+                new ClassPathScanningCandidateComponentProvider(false);
+            scanner.addIncludeFilter(new AssignableTypeFilter(Tactic.class));
+            
+            // Scan for all classes implementing Tactic interface
+            scanner.findCandidateComponents(TACTICS_PACKAGE).forEach(beanDefinition -> {
+                String className = beanDefinition.getBeanClassName();
+                if (className != null && className.startsWith(TACTICS_PACKAGE + ".")) {
+                    // Extract the package name (first level after com.javacup.tactics)
+                    String packagePath = className.substring(TACTICS_PACKAGE.length() + 1);
+                    if (packagePath.contains(".")) {
+                        String tacticPackage = packagePath.substring(0, packagePath.indexOf('.'));
+                        if (!tactics.contains(tacticPackage)) {
+                            tactics.add(tacticPackage);
+                        }
+                    }
+                }
+            });
+            
+            Collections.sort(tactics);
+        } catch (Exception e) {
+            logger.error("Error discovering tactics", e);
         }
         
-        return factory.create();
+        return tactics;
     }
 
     /**
-     * Gets all available tactic names.
-     *
-     * @return set of tactic names
+     * Returns a list of all available tactic names.
+     * <p>
+     * These tactics are dynamically discovered from the com.javacup.tactics package.
+     * Each tactic name corresponds to a subdirectory/package containing a Tactic implementation.
+     * </p>
+     * 
+     * @return unmodifiable list of tactic names
      */
-    public Set<String> getAvailableTactics() {
-        return Collections.unmodifiableSet(tactics.keySet());
-    }
-
-    /**
-     * Checks if a tactic exists.
-     *
-     * @param name the name of the tactic
-     * @return true if the tactic exists
-     */
-    public boolean tacticExists(String name) {
-        return tactics.containsKey(name);
-    }
-
-    /**
-     * Registers a tactic factory.
-     *
-     * @param name the name of the tactic
-     * @param factory the factory to create tactic instances
-     */
-    private void registerTactic(String name, TacticFactory factory) {
-        tactics.put(name, factory);
-        log.debug("Registered tactic: {}", name);
-    }
-
-    /**
-     * Functional interface for creating tactic instances.
-     */
-    @FunctionalInterface
-    private interface TacticFactory {
-        Tactic create();
-    }
-
-    /**
-     * Exception thrown when a tactic is not found.
-     */
-    public static class TacticNotFoundException extends RuntimeException {
-        public TacticNotFoundException(String message) {
-            super(message);
-        }
+    public List<String> getAllTactics() {
+        return Collections.unmodifiableList(availableTactics);
     }
 }
