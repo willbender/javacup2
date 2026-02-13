@@ -55,6 +55,34 @@ h1 {
   margin-top: 20px;
 }
 
+.sound-control {
+  margin-top: 15px;
+}
+
+.sound-toggle-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  color: #667eea;
+}
+
+.sound-toggle-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.sound-toggle-btn:active {
+  transform: translateY(0);
+}
+
 .create-match-btn,
 .reset-match-btn {
   width: 100%;

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import MatchField from './components/MatchField'
 import TacticSelector from './components/TacticSelector'
+import { useMatchSounds } from './utils/useMatchSounds'
 import './App.css'
 
 // Mock tactics data
@@ -51,6 +52,10 @@ function App() {
   const [matchStarted, setMatchStarted] = useState(false)
   const [players, setPlayers] = useState(getInitialPlayers())
   const [ball, setBall] = useState({ x: 0.5, y: 0.5 })
+  const [soundEnabled, setSoundEnabled] = useState(true)
+
+  // Initialize sound system
+  const { playKickSound, toggleSounds, isSoundEnabled } = useMatchSounds(matchStarted)
 
   // Simple animation when match is running
   useEffect(() => {
@@ -62,6 +67,12 @@ function App() {
         const newBall = {
           x: Math.max(0.1, Math.min(0.9, prev.x + (Math.random() - 0.5) * 0.02)),
           y: Math.max(0.1, Math.min(0.9, prev.y + (Math.random() - 0.5) * 0.02))
+        }
+        
+        // Play kick sound occasionally when ball moves significantly
+        const ballMoved = Math.abs(newBall.x - prev.x) > 0.015 || Math.abs(newBall.y - prev.y) > 0.015
+        if (ballMoved && Math.random() < 0.15) {
+          playKickSound()
         }
         
         // Animate players moving slightly towards the new ball position
@@ -111,7 +122,7 @@ function App() {
     }, 100) // Update every 100ms
 
     return () => clearInterval(interval)
-  }, [matchStarted])
+  }, [matchStarted, playKickSound])
 
   const homeTacticName = useMemo(
     () => mockTactics.find(t => t.id === homeTactic)?.name,
@@ -135,6 +146,11 @@ function App() {
     setMatchStarted(false)
     setPlayers(getInitialPlayers())
     setBall({ x: 0.5, y: 0.5 })
+  }
+
+  const handleToggleSounds = () => {
+    const newState = toggleSounds()
+    setSoundEnabled(newState)
   }
 
   return (
@@ -175,6 +191,16 @@ function App() {
                 Reset Match
               </button>
             )}
+          </div>
+          
+          <div className="sound-control">
+            <button 
+              className="sound-toggle-btn"
+              onClick={handleToggleSounds}
+              title={soundEnabled ? "Disable sounds" : "Enable sounds"}
+            >
+              {soundEnabled ? '🔊 Sounds On' : '🔇 Sounds Off'}
+            </button>
           </div>
           
           {matchStarted && (
